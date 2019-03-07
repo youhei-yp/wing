@@ -39,7 +39,7 @@ func SetLogger(filename string) {
 	beego.BeeLogger.SetLogger("file", fmt.Sprintf(`{"filename":"%s"}`, filename))
 }
 
-// SetLevel Set log message level.
+// SetLevel sets log message level.
 func SetLevel(level int) {
 	beego.BeeLogger.SetLevel(level)
 }

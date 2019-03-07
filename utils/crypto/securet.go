@@ -13,8 +13,12 @@ package crypto
 import (
 	"bytes"
 	"crypto/md5"
+	crypto "crypto/rand"
 	"encoding/base64"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"golang.org/x/crypto/scrypt"
+	"io"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -23,9 +27,10 @@ import (
 )
 
 const (
-	encode_char_num   string = "0123456789"
-	encode_char_lower        = "abcdefghijklmnopqrstuvwxyz"
-	encode_char_upper        = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	oauth_code_seeds_num   = "0123456789"
+	oauth_code_seeds_lower = "abcdefghijklmnopqrstuvwxyz"
+	oauth_code_seeds_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	password_hash_bytes    = 64 // password hash length
 )
 
 // Jwt claims data
@@ -50,6 +55,24 @@ func ToMD5(src string) string {
 	ctx.Write([]byte(src))
 	cipher := ctx.Sum(nil)
 	return ToBase64String(cipher)
+}
+
+// GenSalt generates a random salt
+func GenSalt() (string, error) {
+	buf := make([]byte, password_hash_bytes)
+	if _, err := io.ReadFull(crypto.Reader, buf); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", buf), nil
+}
+
+// GenHash hash the given source with salt
+func GenHash(src, salt string) (string, error) {
+	hex, err := scrypt.Key([]byte(src), []byte(salt), 16384, 8, 1, password_hash_bytes)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", hex), nil
 }
 
 // VerifyJwtToken verify the encoded jwt token witch secret string
@@ -92,13 +115,13 @@ func ObatinOAuthCode(randomLength int, randomType string) string {
 	// fill random seeds chars
 	buf := bytes.Buffer{}
 	if strings.Contains(randomType, "0") {
-		buf.WriteString(encode_char_num)
+		buf.WriteString(oauth_code_seeds_num)
 	}
 	if strings.Contains(randomType, "a") {
-		buf.WriteString(encode_char_lower)
+		buf.WriteString(oauth_code_seeds_lower)
 	}
 	if strings.Contains(randomType, "A") {
-		buf.WriteString(encode_char_upper)
+		buf.WriteString(oauth_code_seeds_upper)
 	}
 
 	// check random seeds if empty

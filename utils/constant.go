@@ -8,4 +8,13 @@
 // 00001       2018/12/01   youhei         New version
 // -------------------------------------------------------------------
 
-package wing
+package utils
+
+import (
+	"errors"
+)
+
+var (
+	ErrOrmNotUsing = errors.New("Orm not using")
+	ErrNoRowFound  = errors.New("No row found")
+)
