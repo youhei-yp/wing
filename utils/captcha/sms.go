@@ -39,8 +39,14 @@ const (
 		"&Version=2017-05-25"
 )
 
+// SmsSender sender, including smtp authtication and user info
+type SmsSender struct {
+	accessSecret, accessKeyID string
+	requestUrlFormat          string
+}
+
 // encodeUrl replace encode string to use in web transation
-func encodeUrl(src string) string {
+func (s *SmsSender) encodeUrl(src string) string {
 	ue := url.QueryEscape(src)
 	ue = strings.Replace(ue, "+", "%%20", -1)
 	ue = strings.Replace(ue, "*", "%2A", -1)
@@ -50,7 +56,7 @@ func encodeUrl(src string) string {
 }
 
 // execHttpGet executes http get method
-func execHttpGet(requesturl string) ([]byte, error) {
+func (s *SmsSender) execHttpGet(requesturl string) ([]byte, error) {
 	u, err := url.Parse(requesturl)
 	if err != nil {
 		logger.E("Parse request url:", requesturl, "err:", err)
@@ -80,7 +86,7 @@ func execHttpGet(requesturl string) ([]byte, error) {
 }
 
 // getQueryString parse sms request url query string
-func getQueryString(accessID, phones, sign, tplcode, content string) string {
+func (s *SmsSender) getQueryString(accessID, phones, sign, tplcode, content string) string {
 	nonce, _ := uuid.NewV4()
 	timestamp := url.QueryEscape(time.Now().UTC().Format(time_layout))
 	return fmt.Sprintf(sort_query_format,
@@ -92,4 +98,51 @@ func getQueryString(accessID, phones, sign, tplcode, content string) string {
 		content,   // sms content
 		timestamp, // send timestamp
 	)
+}
+
+func (s *SmsSender) Send(accessID, phones, sign, tplcode, content string) error {
+	// type SMSResponse struct {
+	// 	Message   string `json:"Message"`
+	// 	RequestId string `json:"RequestId"`
+	// 	BizId     string "BizId"
+	// 	Code      string "Code"
+	// }
+
+	// tplcode := sms.TemplateCode
+	// signName := url.QueryEscape(sms.SignName)
+	// content := url.QueryEscape(fmt.Spintf(sms.TemplateFormat, code)) // "{\"code\":\"888123\"}"
+
+	// queryString := getQueryString(access_key_id, phones, signName, tplcode, content)
+
+	// key := []byte(access_secret)
+	// sign := "GET&%%2F&" + encodeUrl(queryString)
+
+	// mac := hmac.New(sha1.New, key)
+	// mac.Write([]byte(sign))
+
+	// signture := encodeUrl(base64.StdEncoding.EncodeToString(mac.Sum(nil)))
+	// requesturl := fmt.Sprintf(request_url_format, signture, queryString)
+	// logger.D("Send sms, request url:", requesturl)
+
+	// resp, err := execHttpGet(requesturl)
+
+	// fmt.Printf("result:%s", resp)
+
+	// result := &SMSResponse{}
+	// json.Unmarshal(resp, result)
+
+	// logger.D("jsonresult:", result)
+	// if result.Message != "OK" {
+	// 	logger.E("send err:", result.Message)
+	// 	return false
+	// }
+	return nil
+}
+
+// NewSmsSender create a sms sender for given cloud service
+func NewSmsSender(secret, keyid, requrl string) *SmsSender {
+	sender := &SmsSender{
+		accessSecret: secret, accessKeyID: keyid, requestUrlFormat: requrl,
+	}
+	return sender
 }
