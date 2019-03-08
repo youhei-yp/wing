@@ -17,4 +17,5 @@ import (
 var (
 	ErrOrmNotUsing = errors.New("Orm not using")
 	ErrNoRowFound  = errors.New("No row found")
+	ErrSendFailed  = errors.New("Failed to send")
 )

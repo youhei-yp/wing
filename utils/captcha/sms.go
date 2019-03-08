@@ -11,6 +11,9 @@
 package captcha
 
 import (
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/json"
 	"fmt"
 	"github.com/satori/go.uuid"
 	"io/ioutil"
@@ -19,6 +22,8 @@ import (
 	"strings"
 	"time"
 	"wing/logger"
+	"wing/utils"
+	"wing/utils/crypto"
 )
 
 const (
@@ -86,56 +91,57 @@ func (s *SmsSender) execHttpGet(requesturl string) ([]byte, error) {
 }
 
 // getQueryString parse sms request url query string
-func (s *SmsSender) getQueryString(accessID, phones, sign, tplcode, content string) string {
-	nonce, _ := uuid.NewV4()
+func (s *SmsSender) getQueryString(phones, signname, tplcode, content string) string {
+	signnonce, _ := uuid.NewV4()
 	timestamp := url.QueryEscape(time.Now().UTC().Format(time_layout))
 	return fmt.Sprintf(sort_query_format,
-		accessID,  // access key id of aiyun
-		phones,    // target phone numbers to send to
-		sign,      // signature name
-		nonce,     // signature nonce
-		tplcode,   // sms template code
-		content,   // sms content
-		timestamp, // send timestamp
+		s.accessKeyID, // access key id of aiyun
+		phones,        // target phone numbers to send to
+		signname,      // signature name
+		signnonce,     // signature nonce
+		tplcode,       // sms template code
+		content,       // sms content
+		timestamp,     // send timestamp
 	)
 }
 
-func (s *SmsSender) Send(accessID, phones, sign, tplcode, content string) error {
-	// type SMSResponse struct {
-	// 	Message   string `json:"Message"`
-	// 	RequestId string `json:"RequestId"`
-	// 	BizId     string "BizId"
-	// 	Code      string "Code"
-	// }
+// Send sends
+func (s *SmsSender) Send(phones, signname, tplcode, content string) error {
+	queryString := s.getQueryString(phones, signname, tplcode, content)
 
-	// tplcode := sms.TemplateCode
-	// signName := url.QueryEscape(sms.SignName)
-	// content := url.QueryEscape(fmt.Spintf(sms.TemplateFormat, code)) // "{\"code\":\"888123\"}"
+	key := []byte(s.accessSecret)
+	signstr := "GET&%%2F&" + s.encodeUrl(queryString)
 
-	// queryString := getQueryString(access_key_id, phones, signName, tplcode, content)
+	mac := hmac.New(sha1.New, key)
+	mac.Write([]byte(signstr))
 
-	// key := []byte(access_secret)
-	// sign := "GET&%%2F&" + encodeUrl(queryString)
+	signture := s.encodeUrl(crypto.ToBase64String(mac.Sum(nil)))
+	requesturl := fmt.Sprintf(s.requestUrlFormat, signture, queryString)
+	logger.D("Send sms, request url:", requesturl)
 
-	// mac := hmac.New(sha1.New, key)
-	// mac.Write([]byte(sign))
+	resp, err := s.execHttpGet(requesturl)
+	if err != nil {
+		logger.E("Failed request cloud server to send sms")
+		return err
+	}
+	logger.D("Cloud server handled request, resp:", resp)
 
-	// signture := encodeUrl(base64.StdEncoding.EncodeToString(mac.Sum(nil)))
-	// requesturl := fmt.Sprintf(request_url_format, signture, queryString)
-	// logger.D("Send sms, request url:", requesturl)
+	result := new(struct {
+		Message   string `json:"Message"`
+		RequestId string `json:"RequestId"`
+		BizId     string "BizId"
+		Code      string "Code"
+	})
+	if err = json.Unmarshal(resp, result); err != nil {
+		logger.E("Failed unmarshal send result:", result)
+		return err
+	}
 
-	// resp, err := execHttpGet(requesturl)
-
-	// fmt.Printf("result:%s", resp)
-
-	// result := &SMSResponse{}
-	// json.Unmarshal(resp, result)
-
-	// logger.D("jsonresult:", result)
-	// if result.Message != "OK" {
-	// 	logger.E("send err:", result.Message)
-	// 	return false
-	// }
+	// check send result status
+	if result.Message != "OK" {
+		logger.E("Failed send sms:", content)
+		return utils.ErrSendFailed
+	}
 	return nil
 }
 
