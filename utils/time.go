@@ -14,8 +14,10 @@ import (
 	"time"
 )
 
-// Standery time layout format at second minimum
-const TimeLayout string = "2006-01-02 15:04:05"
+const (
+	// Standery time layout format at second minimum
+	TimeLayout = "2006-01-02 15:04:05"
+)
 
 // IsSameDay equal given days string based on TimeLayout
 func IsSameDay(src string, des string) bool {
