@@ -40,14 +40,10 @@ func (e *EmailSender) SetContentType(contentType string) *EmailSender {
 
 // Send sends a mail to given contacts
 func (a *EmailSender) Send(mailto, subject, body string) error {
-	from := a.identity
-	if from == "" {
-		from = a.user
-	}
 	contacts := strings.Split(mailto, ";")
 	content := []byte("" +
 		"To: " + mailto + "\r\n" +
-		"From: " + from + "\r\n" +
+		"From: " + a.user + "\r\n" +
 		"Subject: " + subject + "\r\n" +
 		"Content-Type: " + a.contentType + "\r\n\r\n" + body)
 	return smtp.SendMail(a.host, a, a.user, contacts, content)
