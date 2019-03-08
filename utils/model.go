@@ -32,7 +32,7 @@ func NewOrmUtil(name string) (*OrmUtil, error) {
 	}
 
 	u := &OrmUtil{ormName: name, Ormer: ormer}
-	logger.D("Created a orm util as name:", name)
+	logger.I("Created a orm util as name:", name)
 	return u, nil
 }
 
@@ -45,13 +45,13 @@ func (u *OrmUtil) Query(sqlstr string, container interface{}, args ...interface{
 
 	if err := u.Ormer.Raw(sqlstr, args).QueryRow(container); err != nil {
 		if strings.Index(err.Error(), "no row found") != 0 {
-			logger.D("No row found!")
+			logger.I("No row found!")
 			return ErrNoRowFound
 		}
 		logger.E("Query sql:["+sqlstr+"] err:", err)
 		return err
 	}
-	logger.D("Executed query", "["+sqlstr+"]")
+	logger.I("Executed query", "["+sqlstr+"]")
 	return nil
 }
 
@@ -67,6 +67,6 @@ func (u *OrmUtil) Exec(sqlstr string, args ...interface{}) (sql.Result, error) {
 		logger.E("Exec sql:["+sqlstr+"] err:", err)
 		return nil, err
 	}
-	logger.D("Executed sql", "["+sqlstr+"]")
+	logger.I("Executed sql", "["+sqlstr+"]")
 	return result, nil
 }

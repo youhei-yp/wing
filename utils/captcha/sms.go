@@ -73,7 +73,7 @@ func (s *SmsSender) execHttpGet(requesturl string) ([]byte, error) {
 	length := len(rs)
 	geturl := string(rs[0 : length-3])
 
-	logger.D("Execute http get, url:", geturl)
+	logger.I("Execute http get, url:", geturl)
 	res, err := http.Get(geturl)
 	if err != nil {
 		logger.E("Execute get method err:", err)
@@ -117,14 +117,14 @@ func (s *SmsSender) Send(phones, signname, tplcode, content string) error {
 
 	signture := s.encodeUrl(crypto.ToBase64String(mac.Sum(nil)))
 	requesturl := fmt.Sprintf(s.requestUrlFormat, signture, queryString)
-	logger.D("Send sms, request url:", requesturl)
+	logger.I("Send sms, request url:", requesturl)
 
 	resp, err := s.execHttpGet(requesturl)
 	if err != nil {
 		logger.E("Failed request cloud server to send sms")
 		return err
 	}
-	logger.D("Cloud server handled request, resp:", resp)
+	logger.I("Cloud server handled request, resp:", resp)
 
 	result := new(struct {
 		Message   string `json:"Message"`

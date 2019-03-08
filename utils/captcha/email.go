@@ -34,7 +34,7 @@ func (e EmailSender) Start(server *smtp.ServerInfo) (string, []byte, error) {
 // SetContentType sets mail content type
 func (e *EmailSender) SetContentType(contentType string) *EmailSender {
 	e.contentType = contentType
-	logger.D("Set content type to:", contentType)
+	logger.I("Set content type to:", contentType)
 	return e
 }
 
@@ -62,6 +62,6 @@ func NewEmailSender(ideneity, user, password, host string) *EmailSender {
 		smtp.PlainAuth(ideneity, user, password, host),
 		ideneity, user, password, host, contentType,
 	}
-	logger.D("New a NewEmailSender for", user, "with host:", host)
+	logger.I("New a NewEmailSender for", user, "with host:", host)
 	return eu
 }

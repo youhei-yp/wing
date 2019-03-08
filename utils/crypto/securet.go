@@ -83,7 +83,7 @@ func VerifyJwtToken(signedToken, secret string) (string, error) {
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 		return claims.AID, err
 	}
-	logger.D("Verified JWT token:", signedToken, "with secret:", secret)
+	logger.I("Verified JWT token:", signedToken, "with secret:", secret)
 	return "", err
 }
 
@@ -106,7 +106,7 @@ func ObatinJwtToken(aid int64, secret string) (string, int64) {
 	// signs the token with a secret.
 	signedToken, _ := token.SignedString([]byte(secret))
 
-	logger.D("Obatin JWT token:", signedToken, "expire at:", expireAt)
+	logger.I("Obatin JWT token:", signedToken, "expire at:", expireAt)
 	return signedToken, expireAt
 }
 
@@ -139,6 +139,6 @@ func ObatinOAuthCode(randomLength int, randomType string) string {
 		buf.WriteByte(str[rand.Intn(len)])
 	}
 	code := buf.String()
-	logger.D("Obatin OAuth code:", code)
+	logger.I("Obatin OAuth code:", code)
 	return code
 }

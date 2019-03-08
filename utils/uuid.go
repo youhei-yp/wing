@@ -20,13 +20,15 @@ var uuidNode *snowflake.Node
 
 // init uuid generater
 func init() {
-	node, err := snowflake.NewNode(1)
-	if err != nil {
-		logger.E("Create uuid generater, err:", err.Error())
-		panic(err.Error())
+	if uuidNode == nil {
+		node, err := snowflake.NewNode(1)
+		if err != nil {
+			logger.E("Create uuid generater, err:", err.Error())
+			panic(err.Error())
+		}
+		logger.I("Inited uuid generater:", node)
+		uuidNode = node
 	}
-	logger.D("Inited uuid generater:", node)
-	uuidNode = node
 }
 
 //
