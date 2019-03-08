@@ -33,6 +33,7 @@ func init() {
 	beego.SetLogFuncCall(true)
 	logs.SetLogger("console")
 	logs.SetLogger("file", `{"filename":"./logs/server.log"}`)
+	logs.SetLogFuncCallDepth(5)
 }
 
 // SetLogger provides a given filename to logs a messagge to file.

@@ -43,15 +43,16 @@ func (u *OrmUtil) Query(sqlstr string, container interface{}, args ...interface{
 		return ErrOrmNotUsing
 	}
 
+	logger.I("Executed query:["+sqlstr+"] args:", args)
 	if err := u.Ormer.Raw(sqlstr, args).QueryRow(container); err != nil {
-		if strings.Index(err.Error(), "no row found") != 0 {
+		if strings.Index(err.Error(), "no row found") != -1 {
 			logger.I("No row found!")
 			return ErrNoRowFound
 		}
 		logger.E("Query sql:["+sqlstr+"] err:", err)
 		return err
 	}
-	logger.I("Executed query", "["+sqlstr+"]")
+	logger.I("Query retulst:", container)
 	return nil
 }
 
