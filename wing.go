@@ -9,3 +9,12 @@
 // -------------------------------------------------------------------
 
 package wing
+
+import (
+	_ "wing/logger"
+	_ "wing/utils"
+	_ "wing/utils/captcha"
+	_ "wing/utils/crypto"
+)
+
+func main() {}

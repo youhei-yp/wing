@@ -29,7 +29,7 @@ const (
 
 func init() {
 	beego.BeeLogger.SetLogger("console")
-	beego.BeeLogger.SetLevel(Informational)
+	beego.BeeLogger.SetLevel(Debug)
 	beego.BeeLogger.EnableFuncCallDepth(true)
 	beego.BeeLogger.SetLogFuncCallDepth(5) // default 5
 }
