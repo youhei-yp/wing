@@ -58,8 +58,9 @@ func NewEmailSender(ideneity, user, password, host string) *EmailSender {
 	// default content type is html, you may set plain as
 	// 'text/plain; charset=UTF-8'
 	contentType := "text/html; charset=UTF-8"
+	hostname := strings.Split(host, ":")
 	eu := &EmailSender{
-		smtp.PlainAuth(ideneity, user, password, host),
+		smtp.PlainAuth(ideneity, user, password, hostname[0]),
 		ideneity, user, password, host, contentType,
 	}
 	logger.I("New a NewEmailSender for", user, "with host:", host)
