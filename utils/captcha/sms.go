@@ -50,6 +50,14 @@ type SmsSender struct {
 	requestUrlFormat          string
 }
 
+// GetResult get method response
+type GetResult struct {
+	Message   string `json:"Message"`
+	RequestId string `json:"RequestId"`
+	BizId     string "BizId"
+	Code      string "Code"
+}
+
 // encodeUrl replace encode string to use in web transation
 func (s *SmsSender) encodeUrl(src string) string {
 	ue := url.QueryEscape(src)
@@ -79,10 +87,10 @@ func (s *SmsSender) execHttpGet(requesturl string) ([]byte, error) {
 		logger.E("Execute get method err:", err)
 		return nil, err
 	}
-	defer res.Body.Close()
 
 	// read executed response data
 	rst, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
 	if err != nil {
 		logger.E("Read get method response err:", err)
 		return nil, err
@@ -110,7 +118,7 @@ func (s *SmsSender) Send(phones, signname, tplcode, content string) error {
 	queryString := s.getQueryString(phones, signname, tplcode, content)
 
 	key := []byte(s.accessSecret)
-	signstr := "GET&%%2F&" + s.encodeUrl(queryString)
+	signstr := fmt.Sprintf("GET&%%2F&%s", s.encodeUrl(queryString))
 
 	mac := hmac.New(sha1.New, key)
 	mac.Write([]byte(signstr))
@@ -124,18 +132,13 @@ func (s *SmsSender) Send(phones, signname, tplcode, content string) error {
 		logger.E("Failed request cloud server to send sms")
 		return err
 	}
-	logger.I("Cloud server handled request, resp:", resp)
 
-	result := new(struct {
-		Message   string `json:"Message"`
-		RequestId string `json:"RequestId"`
-		BizId     string "BizId"
-		Code      string "Code"
-	})
+	result := &GetResult{}
 	if err = json.Unmarshal(resp, result); err != nil {
 		logger.E("Failed unmarshal send result:", result)
 		return err
 	}
+	logger.I("Cloud server handled resp:", result.Message, result.RequestId)
 
 	// check send result status
 	if result.Message != "OK" {

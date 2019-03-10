@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 	"wing/logger"
+	"wing/utils"
 )
 
 const (
@@ -75,38 +76,42 @@ func GenHash(src, salt string) (string, error) {
 	return fmt.Sprintf("%x", hex), nil
 }
 
-// VerifyJwtToken verify the encoded jwt token witch secret string
-func VerifyJwtToken(signedToken, secret string) (string, error) {
+// VerifyJwtToken verify the encoded jwt token witch salt string
+func VerifyJwtToken(signedToken, salt string) (string, error) {
 	token, err := jwt.ParseWithClaims(signedToken, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secret), nil
+		return []byte(salt), nil
 	})
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		logger.I("Verified JWT token:", signedToken, "by salt:", salt)
 		return claims.AID, err
 	}
-	logger.I("Verified JWT token:", signedToken, "with secret:", secret)
+	logger.E("Invalid JWT token:", signedToken)
 	return "", err
 }
 
-// ObatinJwtToken create a jwt token with account id and secret string,
+// ObatinJwtToken create a jwt token with account id and salt string,
 // the token will expired one hour later
-func ObatinJwtToken(aid int64, secret string) (string, int64) {
-	account := strconv.FormatInt(aid, 10)
+func ObatinJwtToken(aid int64, salt string) (string, int64) {
+	aidstr := strconv.FormatInt(aid, 10)
 	expireAt := time.Now().Add(time.Hour * 1).Unix()
 	claims := Claims{
-		account,
+		aidstr,
 		jwt.StandardClaims{
 			ExpiresAt: expireAt,
-			Issuer:    account,
+			Issuer:    aidstr,
 		},
 	}
 
 	// create the token using your claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	// signs the token with a secret.
-	signedToken, _ := token.SignedString([]byte(secret))
+	// signs the token with a salt.
+	signedToken, _ := token.SignedString([]byte(salt))
 
-	logger.I("Obatin JWT token:", signedToken, "expire at:", expireAt)
+	if logger.IsEnableLevel(logger.Informational) {
+		at := time.Unix(expireAt, 0).Format(utils.TimeLayout)
+		logger.I("Obatin JWT token:", signedToken, "expire at:", at)
+	}
 	return signedToken, expireAt
 }
 

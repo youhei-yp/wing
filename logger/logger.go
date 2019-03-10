@@ -28,8 +28,10 @@ const (
 	Debug
 )
 
+var logger_level int = Debug
+
 func init() {
-	beego.SetLevel(Debug)
+	beego.SetLevel(logger_level)
 	beego.SetLogFuncCall(true)
 	logs.SetLogger("console")
 	logs.SetLogger("file", `{"filename":"./logs/server.log"}`)
@@ -43,7 +45,13 @@ func SetLogger(filename string) {
 
 // SetLevel sets log message level.
 func SetLevel(level int) {
+	logger_level = level
 	beego.SetLevel(level)
+}
+
+// Check the given level if enabled
+func IsEnableLevel(level int) bool {
+	return level >= logger_level
 }
 
 // Logs a message at emergency level.

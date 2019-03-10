@@ -12,6 +12,7 @@ package utils
 
 import (
 	"github.com/bwmarrin/snowflake"
+	"strconv"
 	"wing/logger"
 )
 
@@ -31,9 +32,12 @@ func init() {
 	}
 }
 
-//
 // ObatinUUID generate a new uuid in int64
-//
 func ObatinUUID() int64 {
 	return uuidNode.Generate().Int64()
+}
+
+// ObatinUUIDString generate a new uuid in string
+func ObatinUUIDString() string {
+	return strconv.FormatInt(ObatinUUID(), 10)
 }
