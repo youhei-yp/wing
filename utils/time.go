@@ -32,9 +32,8 @@ func IsToday(des string) bool {
 
 // IsTodayUnix check the given time string if today
 func IsTodayUnix(des int64) bool {
-	now := time.Now().Format(DateLayout)
-	st, _ := time.Parse(DateLayout, now)
-	return st.Unix() == des
+	deslayout := time.Unix(des, 0).Format(DateLayout)
+	return IsToday(deslayout)
 }
 
 // IsSameDay equal given days string based on TimeLayout

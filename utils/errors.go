@@ -15,7 +15,12 @@ import (
 )
 
 var (
+	// ErrOrmNotUsing not using error
 	ErrOrmNotUsing = errors.New("Orm not using")
-	ErrNoRowFound  = errors.New("No row found")
-	ErrSendFailed  = errors.New("Failed to send")
+
+	// ErrNoRowFound not found row error
+	ErrNoRowFound = errors.New("No row found")
+
+	// ErrSendFailed failed send sms or mail error
+	ErrSendFailed = errors.New("Failed to send")
 )

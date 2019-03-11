@@ -8,13 +8,14 @@
 // 00001       2018/12/01   youhei         New version
 // -------------------------------------------------------------------
 
-package utils
+package content
 
 import (
 	"database/sql"
 	"github.com/astaxie/beego/orm"
 	"strings"
 	"wing/logger"
+	"wing/utils"
 )
 
 // OrmUtil : provides a named orm object to query or exec sql commend
@@ -40,19 +41,18 @@ func NewOrmUtil(name string) (*OrmUtil, error) {
 func (u *OrmUtil) Query(sqlstr string, container interface{}, args ...interface{}) error {
 	if u.Ormer == nil {
 		logger.E("Ormer", "["+u.ormName+"]", "not using!")
-		return ErrOrmNotUsing
+		return utils.ErrOrmNotUsing
 	}
 
-	logger.I("Executed query:["+sqlstr+"] args:", args)
 	if err := u.Ormer.Raw(sqlstr, args).QueryRow(container); err != nil {
 		if strings.Index(err.Error(), "no row found") != -1 {
 			logger.I("No row found!")
-			return ErrNoRowFound
+			return utils.ErrNoRowFound
 		}
 		logger.E("Query sql:["+sqlstr+"] err:", err)
 		return err
 	}
-	logger.I("Query retulst:", container)
+	logger.I("Query ["+sqlstr+"] args:{", args, "} retulst:{", container, "}")
 	return nil
 }
 
@@ -60,7 +60,7 @@ func (u *OrmUtil) Query(sqlstr string, container interface{}, args ...interface{
 func (u *OrmUtil) Exec(sqlstr string, args ...interface{}) (sql.Result, error) {
 	if u.Ormer == nil {
 		logger.E("Ormer", "["+u.ormName+"]", "not using!")
-		return nil, ErrOrmNotUsing
+		return nil, utils.ErrOrmNotUsing
 	}
 
 	result, err := u.Ormer.Raw(sqlstr, args).Exec()
@@ -68,6 +68,6 @@ func (u *OrmUtil) Exec(sqlstr string, args ...interface{}) (sql.Result, error) {
 		logger.E("Exec sql:["+sqlstr+"] err:", err)
 		return nil, err
 	}
-	logger.I("Executed sql", "["+sqlstr+"]")
+	logger.I("Executed sql:[" + sqlstr + "]")
 	return result, nil
 }
