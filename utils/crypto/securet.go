@@ -20,7 +20,6 @@ import (
 	"golang.org/x/crypto/scrypt"
 	"io"
 	"math/rand"
-	"strconv"
 	"strings"
 	"time"
 	"wing/logger"
@@ -28,15 +27,15 @@ import (
 )
 
 const (
-	oauth_code_seeds_num   = "0123456789"
-	oauth_code_seeds_lower = "abcdefghijklmnopqrstuvwxyz"
-	oauth_code_seeds_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	password_hash_bytes    = 64 // password hash length
+	oauthCodeSeedsNum   = "0123456789"
+	oauthCodeSeedsLower = "abcdefghijklmnopqrstuvwxyz"
+	oauthCodeSeedsUpper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	passwordHashBytes   = 64 // password hash length
 )
 
-// Jwt claims data
+// Claims jwt claims data
 type Claims struct {
-	AID string `json:"aid"`
+	Keyword string `json:"keyword"`
 	jwt.StandardClaims
 }
 
@@ -60,7 +59,7 @@ func ToMD5(src string) string {
 
 // GenSalt generates a random salt
 func GenSalt() (string, error) {
-	buf := make([]byte, password_hash_bytes)
+	buf := make([]byte, passwordHashBytes)
 	if _, err := io.ReadFull(crypto.Reader, buf); err != nil {
 		return "", err
 	}
@@ -69,7 +68,7 @@ func GenSalt() (string, error) {
 
 // GenHash hash the given source with salt
 func GenHash(src, salt string) (string, error) {
-	hex, err := scrypt.Key([]byte(src), []byte(salt), 16384, 8, 1, password_hash_bytes)
+	hex, err := scrypt.Key([]byte(src), []byte(salt), 16384, 8, 1, passwordHashBytes)
 	if err != nil {
 		return "", err
 	}
@@ -83,7 +82,7 @@ func VerifyJwtToken(signedToken, salt string) (string, error) {
 	})
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 		logger.I("Verified JWT token:", signedToken, "by salt:", salt)
-		return claims.AID, err
+		return claims.Keyword, err
 	}
 	logger.E("Invalid JWT token:", signedToken)
 	return "", err
@@ -91,14 +90,13 @@ func VerifyJwtToken(signedToken, salt string) (string, error) {
 
 // ObatinJwtToken create a jwt token with account id and salt string,
 // the token will expired one hour later
-func ObatinJwtToken(aid int64, salt string) (string, int64) {
-	aidstr := strconv.FormatInt(aid, 10)
+func ObatinJwtToken(keyword string, salt string) (string, int64) {
 	expireAt := time.Now().Add(time.Hour * 1).Unix()
 	claims := Claims{
-		aidstr,
+		keyword,
 		jwt.StandardClaims{
 			ExpiresAt: expireAt,
-			Issuer:    aidstr,
+			Issuer:    keyword,
 		},
 	}
 
@@ -120,13 +118,13 @@ func ObatinOAuthCode(randomLength int, randomType string) string {
 	// fill random seeds chars
 	buf := bytes.Buffer{}
 	if strings.Contains(randomType, "0") {
-		buf.WriteString(oauth_code_seeds_num)
+		buf.WriteString(oauthCodeSeedsNum)
 	}
 	if strings.Contains(randomType, "a") {
-		buf.WriteString(oauth_code_seeds_lower)
+		buf.WriteString(oauthCodeSeedsLower)
 	}
 	if strings.Contains(randomType, "A") {
-		buf.WriteString(oauth_code_seeds_upper)
+		buf.WriteString(oauthCodeSeedsUpper)
 	}
 
 	// check random seeds if empty
