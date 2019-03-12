@@ -15,6 +15,12 @@ import (
 )
 
 var (
+	// ErrInvalidData invalid data
+	ErrInvalidData = errors.New("Invalid data")
+
+	// ErrUnperparedState unperpared runtime state
+	ErrUnperparedState = errors.New("unperpared runtime state")
+
 	// ErrOrmNotUsing not using error
 	ErrOrmNotUsing = errors.New("Orm not using")
 
@@ -23,4 +29,7 @@ var (
 
 	// ErrSendFailed failed send sms or mail error
 	ErrSendFailed = errors.New("Failed to send")
+
+	// ErrAuthDenied permission denied
+	ErrAuthDenied = errors.New("Permission denied")
 )

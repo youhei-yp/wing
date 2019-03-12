@@ -8,4 +8,10 @@
 // 00001       2018/12/01   youhei         New version
 // -------------------------------------------------------------------
 
-package types
+package socket
+
+var (
+	ErrUnexpectedError = SocketResp{1002, "Unexpected error"}
+	ErrInvalidRequest  = SocketResp{1003, "Invalid request data"}
+	Success            = SocketResp{0001, "OK"}
+)
