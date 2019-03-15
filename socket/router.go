@@ -26,8 +26,8 @@ const (
 	maxConnectCount    = 200000
 )
 
-var clientsPool *sockeClientsPool
-var controller SocketController
+var clientsPool *sockeClientsPool  // socket clients pool
+var socketCtrller SocketController // socket controller
 
 // sockeClientPool client connections pool
 type sockeClientsPool struct {
@@ -57,7 +57,7 @@ func Init(ctrller SocketController) {
 	clientsPool.req2uid = make(map[uintptr]string)
 	clientsPool.uid2req = make(map[string]uintptr)
 	clientsPool.clients = make(map[string]socketio.Socket)
-	controller = ctrller
+	socketCtrller = ctrller
 
 	beego.Handler("/socket.io/", socketHandler())
 	logger.I("Inited app socket.io handler")
@@ -66,13 +66,13 @@ func Init(ctrller SocketController) {
 // Notify request notify target client
 func Notify(uuid string) error {
 	logger.I("Request notify client:", uuid)
-	if clientsPool == nil || controller == nil {
+	if clientsPool == nil || socketCtrller == nil {
 		logger.E("SocketController have not inited!")
 		return utils.ErrUnperparedState
 	}
 
 	target := clientsPool.clients[uuid]
-	return controller.OnNotify(target)
+	return socketCtrller.OnNotify(target)
 }
 
 // socketHandler return a valid http handler for socket.io
@@ -100,7 +100,7 @@ func socketHandler() http.Handler {
 			return utils.ErrInvalidData
 		}
 
-		if !controller.OnAuthentication(req) {
+		if !socketCtrller.OnAuthentication(req) {
 			logger.E("Auth client error")
 			return utils.ErrAuthDenied
 		}
@@ -121,21 +121,21 @@ func socketHandler() http.Handler {
 
 	// set connection event
 	server.On("connection", func(so socketio.Socket) {
-		controller.OnConnected(so)
+		socketCtrller.OnConnected(so)
 	})
 
 	// set disconnection event
 	server.On("disconnection", func(so socketio.Socket) {
-		controller.OnDisconnected(so)
+		socketCtrller.OnDisconnected(so)
 	})
 
 	// set error event
 	server.On("error", func(so socketio.Socket, err error) {
-		controller.OnError(so, err)
+		socketCtrller.OnError(so, err)
 	})
 
 	// set custom events
-	events := controller.OnGenEventsMap()
+	events := socketCtrller.OnGenEventsMap()
 	if events != nil {
 		for evt, callback := range events {
 			server.On(evt, callback)

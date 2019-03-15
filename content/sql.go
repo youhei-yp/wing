@@ -13,7 +13,7 @@ package content
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" // mysql driver
 	"wing/logger"
 	"wing/utils"
 )
@@ -58,7 +58,7 @@ func NewSQLUtil(user, password, dbname string, option ...string) (*SQLUtil, erro
 
 // PrepareQuery execute query sql data and fill into the given container
 // @notice : you must use ScanRow or ScanRows to scan query data
-func (u *SQLUtil) PrepareQuery(sqlstr string, scanedFunc RowScanedFunc, args ...interface{}) (*sql.Rows, error) {
+func (u *SQLUtil) PrepareQuery(sqlstr string, args ...interface{}) (*sql.Rows, error) {
 	rows, err := u.db.Query(sqlstr, args)
 	if err != nil {
 		logger.E("Query sql["+sqlstr+"] err:", err)
@@ -86,20 +86,20 @@ func (u *SQLUtil) ScanRow(rows *sql.Rows, outer ...interface{}) error {
 }
 
 // ScanRows scan and get all rows columns, each row returned by RowScanedFunc
-func (u *SQLUtil) ScanRows(rows *sql.Rows, scanedFunc RowScanedFunc, outer ...interface{}) error {
+func (u *SQLUtil) ScanRows(rows *sql.Rows, scanedFunc RowScanedFunc, temp ...interface{}) error {
 	defer rows.Close()
 	haveRows := false
 
 	for rows.Next() {
 		haveRows = true
 		rows.Columns()
-		if err := rows.Scan(outer...); err != nil {
+		if err := rows.Scan(temp...); err != nil {
 			logger.E("Scan rows err:", err)
 			return err
 		}
 		if scanedFunc != nil {
-			logger.I("Scaned row result:", outer)
-			scanedFunc(outer...)
+			logger.I("Scaned row result:", temp)
+			scanedFunc(temp...)
 		}
 	}
 

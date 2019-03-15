@@ -13,6 +13,7 @@ package content
 import (
 	"database/sql"
 	"github.com/astaxie/beego/orm"
+	_ "github.com/go-sql-driver/mysql" // mysql driver
 	"strings"
 	"wing/logger"
 	"wing/utils"

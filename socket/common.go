@@ -18,8 +18,8 @@ import (
 
 // SocketResp response data to client
 type SocketResp struct {
-	State   int    `json:"state"`
-	Message string `json:"message"`
+	State   int    `json:"state"`   // socket event status, 1 is success
+	Message string `json:"message"` // socket event response data
 }
 
 //ValidateChecker validate parse struct datas
@@ -61,38 +61,42 @@ func ParseJSONValidate(data string, validateFunc ValidateChecker, outer interfac
 
 // RespAck marshal ack data to string
 func RespAck(resp SocketResp) string {
-	result, _ := json.Marshal(resp)
+	result, err := json.Marshal(resp)
+	if err != nil {
+		logger.E("Parse socket ack:", resp, "err:", err)
+		return ""
+	}
 	return string(result)
 }
 
 // RespSuccess marsharl success ack to string
 func RespSuccess() string {
-	result, _ := json.Marshal(Success)
-	return string(result)
+	return RespAck(Success)
 }
 
 // RespMessage marsharl success ack witch given message to string
 func RespMessage(msg string) string {
 	resp := Success
 	resp.Message = msg
-	result, _ := json.Marshal(resp)
-	return string(result)
+	return RespAck(resp)
 }
 
 // RespStruct marsharl success ack witch given struct data
 func RespStruct(data interface{}) string {
-	msg, _ := json.Marshal(data)
+	msg, err := json.Marshal(data)
+	if err != nil {
+		logger.E("Parse socket ack struct:", data, "err:", err)
+		return RespUnexpectedError()
+	}
 	return RespMessage(string(msg))
 }
 
 // RespNotFoundError marsharl not found error to string as socket ack
 func RespNotFoundError() string {
-	result, _ := json.Marshal(ErrNotFound)
-	return string(result)
+	return RespAck(ErrNotFound)
 }
 
 // RespUnexpectedError marsharl unexpected error to string as socket ack
 func RespUnexpectedError() string {
-	result, _ := json.Marshal(ErrUnexpectedError)
-	return string(result)
+	return RespAck(ErrUnexpectedError)
 }

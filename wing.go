@@ -11,11 +11,11 @@
 package wing
 
 import (
+	_ "wing/captcha"
+	_ "wing/content"
+	_ "wing/crypto"
 	_ "wing/logger"
 	_ "wing/utils"
-	_ "wing/utils/captcha"
-	_ "wing/utils/content"
-	_ "wing/utils/crypto"
 )
 
 func main() {}

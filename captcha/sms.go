@@ -21,14 +21,14 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"wing/crypto"
 	"wing/logger"
 	"wing/utils"
-	"wing/utils/crypto"
 )
 
 const (
-	time_layout       = "2006-01-02T15:04:05Z"
-	sort_query_format = "AccessKeyId=%s" +
+	timeLayout      = "2006-01-02T15:04:05Z"
+	sortQueryFormat = "AccessKeyId=%s" +
 		"&Action=SendSms" +
 		"&Format=JSON" +
 		"&OutId=123" +
@@ -47,19 +47,19 @@ const (
 // SmsSender sender, including smtp authtication and user info
 type SmsSender struct {
 	accessSecret, accessKeyID string
-	requestUrlFormat          string
+	requestURLFormat          string
 }
 
-// GetResult get method response
-type GetResult struct {
+// getResult get method response
+type respResult struct {
 	Message   string `json:"Message"`
-	RequestId string `json:"RequestId"`
-	BizId     string "BizId"
-	Code      string "Code"
+	RequestID string `json:"RequestId"`
+	// BizID     string "BizId"
+	// Code      string "Code"
 }
 
-// encodeUrl replace encode string to use in web transation
-func (s *SmsSender) encodeUrl(src string) string {
+// encodeURL replace encode string to use in web transation
+func (s *SmsSender) encodeURL(src string) string {
 	ue := url.QueryEscape(src)
 	ue = strings.Replace(ue, "+", "%%20", -1)
 	ue = strings.Replace(ue, "*", "%2A", -1)
@@ -68,8 +68,8 @@ func (s *SmsSender) encodeUrl(src string) string {
 	return ue
 }
 
-// execHttpGet executes http get method
-func (s *SmsSender) execHttpGet(requesturl string) ([]byte, error) {
+// requestRemoteSend executes http get method to request remote send
+func (s *SmsSender) requestRemoteSend(requesturl string) ([]byte, error) {
 	u, err := url.Parse(requesturl)
 	if err != nil {
 		logger.E("Parse request url:", requesturl, "err:", err)
@@ -101,8 +101,8 @@ func (s *SmsSender) execHttpGet(requesturl string) ([]byte, error) {
 // getQueryString parse sms request url query string
 func (s *SmsSender) getQueryString(phones, signname, tplcode, content string) string {
 	signnonce, _ := uuid.NewV4()
-	timestamp := url.QueryEscape(time.Now().UTC().Format(time_layout))
-	return fmt.Sprintf(sort_query_format,
+	timestamp := url.QueryEscape(time.Now().UTC().Format(timeLayout))
+	return fmt.Sprintf(sortQueryFormat,
 		s.accessKeyID, // access key id of aiyun
 		phones,        // target phone numbers to send to
 		signname,      // signature name
@@ -118,27 +118,27 @@ func (s *SmsSender) Send(phones, signname, tplcode, content string) error {
 	queryString := s.getQueryString(phones, signname, tplcode, content)
 
 	key := []byte(s.accessSecret)
-	signstr := fmt.Sprintf("GET&%%2F&%s", s.encodeUrl(queryString))
+	signstr := fmt.Sprintf("GET&%%2F&%s", s.encodeURL(queryString))
 
 	mac := hmac.New(sha1.New, key)
 	mac.Write([]byte(signstr))
 
-	signture := s.encodeUrl(crypto.ToBase64String(mac.Sum(nil)))
-	requesturl := fmt.Sprintf(s.requestUrlFormat, signture, queryString)
+	signture := s.encodeURL(crypto.ToBase64String(mac.Sum(nil)))
+	requesturl := fmt.Sprintf(s.requestURLFormat, signture, queryString)
 	logger.I("Send sms, request url:", requesturl)
 
-	resp, err := s.execHttpGet(requesturl)
+	resp, err := s.requestRemoteSend(requesturl)
 	if err != nil {
 		logger.E("Failed request cloud server to send sms")
 		return err
 	}
 
-	result := &GetResult{}
+	result := &respResult{}
 	if err = json.Unmarshal(resp, result); err != nil {
 		logger.E("Failed unmarshal send result:", result)
 		return err
 	}
-	logger.I("Cloud server handled resp:", result.Message, result.RequestId)
+	logger.I("Cloud server handled resp:", result.Message, result.RequestID)
 
 	// check send result status
 	if result.Message != "OK" {
@@ -151,7 +151,7 @@ func (s *SmsSender) Send(phones, signname, tplcode, content string) error {
 // NewSmsSender create a sms sender for given cloud service
 func NewSmsSender(secret, keyid, requrl string) *SmsSender {
 	sender := &SmsSender{
-		accessSecret: secret, accessKeyID: keyid, requestUrlFormat: requrl,
+		accessSecret: secret, accessKeyID: keyid, requestURLFormat: requrl,
 	}
 	return sender
 }

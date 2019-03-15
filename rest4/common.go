@@ -19,17 +19,17 @@ import (
 // Rest4Controller basic rest4 controller
 type Rest4Controller struct {
 	beego.Controller
-	CtlName string
+	CtlName string // controller name for logger
 }
 
 // Rest4Resp response data to client
 type Rest4Resp struct {
-	State  int    `json:"state"`
-	Code   int    `json:"code"`
-	UUID   string `json:"uuid"`
-	Token  string `json:"token"`
-	Latest int64  `json:"latest"`
-	More   string `json:"more"`
+	State  int    `json:"state"`  // as http status, 200 is success
+	Code   int    `json:"code"`   // internal handled status code
+	UUID   string `json:"uuid"`   // account uuid
+	Token  string `json:"token"`  // request token to call rest interface
+	Latest int64  `json:"latest"` // account latest update time
+	More   string `json:"more"`   // extension data
 }
 
 // Prepare get controller name

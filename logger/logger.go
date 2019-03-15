@@ -28,10 +28,11 @@ const (
 	Debug
 )
 
-var logger_level int = Debug
+// current logger output level
+var currentLoggerLevel = Debug
 
 func init() {
-	beego.SetLevel(logger_level)
+	beego.SetLevel(currentLoggerLevel)
 	beego.SetLogFuncCall(true)
 	logs.SetLogger("console")
 	logs.SetLogger("file", `{"filename":"./logs/server.log"}`)
@@ -45,51 +46,51 @@ func SetLogger(filename string) {
 
 // SetLevel sets log message level.
 func SetLevel(level int) {
-	logger_level = level
+	currentLoggerLevel = level
 	beego.SetLevel(level)
 }
 
-// Check the given level if enabled
-func IsEnableLevel(level int) bool {
-	return level >= logger_level
+// IsLevelEnabled check the given level if enabled
+func IsLevelEnabled(level int) bool {
+	return level >= currentLoggerLevel
 }
 
-// Logs a message at emergency level.
+// EM logs a message at emergency level.
 func EM(v ...interface{}) {
 	beego.Emergency(v...)
 }
 
-// Logs a message at alert level.
+// AL logs a message at alert level.
 func AL(v ...interface{}) {
 	beego.Alert(v...)
 }
 
-// Logs a message at critical level.
+// CR logs a message at critical level.
 func CR(v ...interface{}) {
 	beego.Critical(v...)
 }
 
-// Logs a message at error level.
+// E logs a message at error level.
 func E(v ...interface{}) {
 	beego.Error(v...)
 }
 
-// Logs a message at warning level.
+// W logs a message at warning level.
 func W(v ...interface{}) {
 	beego.Warning(v...)
 }
 
-// Logs a message at notice level.
+// N logs a message at notice level.
 func N(v ...interface{}) {
 	beego.Notice(v...)
 }
 
-// Logs a message at info level.
+// I logs a message at info level.
 func I(v ...interface{}) {
 	beego.Informational(v...)
 }
 
-// Logs a message at debug level.
+// D logs a message at debug level.
 func D(v ...interface{}) {
 	beego.Debug(v...)
 }

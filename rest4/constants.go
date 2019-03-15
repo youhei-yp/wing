@@ -21,8 +21,5 @@ var (
 	ErrExpiredCode     = Rest4Resp{400, 1008, "", "", 0, "OAuth code expired"}
 	ErrSendFailed      = Rest4Resp{400, 1009, "", "", 0, "Can not send OAuth code"}
 	ErrOverloadLimit   = Rest4Resp{400, 1010, "", "", 0, "Overload the max limitations"}
-	Success            = Rest4Resp{200, 1000, "", "", 0, "OK"}
-
-	//SoUnexpectedError = SocketResp{1002, "Unexpected error"}
-	//SoSuccess         = SocketResp{1, "OK"}
+	Success            = Rest4Resp{200, 0001, "", "", 0, "OK"}
 )

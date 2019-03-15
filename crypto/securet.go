@@ -106,7 +106,7 @@ func ObatinJwtToken(keyword string, salt string) (string, int64) {
 	// signs the token with a salt.
 	signedToken, _ := token.SignedString([]byte(salt))
 
-	if logger.IsEnableLevel(logger.Informational) {
+	if logger.IsLevelEnabled(logger.Informational) {
 		at := time.Unix(expireAt, 0).Format(utils.TimeLayout)
 		logger.I("Obatin JWT token:", signedToken, "expire at:", at)
 	}

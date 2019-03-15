@@ -13,9 +13,9 @@ package socket
 
 import (
 	"github.com/googollee/go-socket.io"
-	"github.com/youhei-yp/wing/logger"
 	"net/http"
 	"unsafe"
+	"wing/logger"
 )
 
 // SimpleController default socket controller
