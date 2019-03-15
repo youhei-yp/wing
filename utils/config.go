@@ -31,6 +31,9 @@ type Configs struct {
 // configsMap configs map, key is config file path
 var configsMap map[string]*Configs
 
+// ReloadCallback configs reloaded event
+type ReloadCallback func(last interface{})
+
 // NewConfigs create singleton configures object
 func NewConfigs(path string, container interface{}) *Configs {
 	if configsMap == nil {
@@ -90,7 +93,7 @@ func (c *Configs) Load() error {
 		return err
 	}
 
-	logger.I("Parsed config file:", f, "data:", c.cfgData)
+	logger.D("Parsed config file:", f, "data:", c.cfgData)
 	return nil
 }
 
@@ -100,25 +103,32 @@ func (c *Configs) Load() error {
 //     (1). login server pc and open terminal
 //     (2). execute command
 //          ~$: kill -SIGUSR1 {running port of go server}
-func (c *Configs) Start() error {
-	// load configs if not load yet
-	if c.cfgData == nil {
-		if err := c.Load(); err != nil {
-			return err
-		}
+func (c *Configs) Start(cb ReloadCallback) error {
+	logger.D("Load configs before start monitor")
+	if err := c.Load(); err != nil {
+		return err
 	}
 
 	// start sign moniter to reload config as hot configuration
 	c.once.Do(func() {
 		sign := make(chan os.Signal, 1)
 		signal.Notify(sign, syscall.SIGUSR1)
-		go func() {
+		callback := cb
+
+		go func(cfg *Configs) {
 			for {
 				<-sign
-				logger.D("Reloaded config")
-				c.Load()
+				if cfg == nil {
+					logger.E("Failed reloaded configs")
+					return
+				}
+				logger.D("Reloading configs...")
+				err := cfg.Load()
+				if err == nil && callback != nil {
+					callback(cfg.cfgData)
+				}
 			}
-		}()
+		}(c)
 	})
 	return nil
 }

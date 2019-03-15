@@ -35,13 +35,16 @@ func init() {
 	beego.SetLevel(currentLoggerLevel)
 	beego.SetLogFuncCall(true)
 	logs.SetLogger("console")
-	logs.SetLogger("file", `{"filename":"./logs/server.log"}`)
 	logs.SetLogFuncCallDepth(5)
+	D("Inited wing logger as console output")
 }
 
 // SetLogger provides a given filename to logs a messagge to file.
 func SetLogger(filename string) {
-	logs.SetLogger("file", fmt.Sprintf(`{"filename":"%s"}`, filename))
+	logs.GetBeeLogger().DelLogger("file")
+	logs.SetLogger("file", fmt.Sprintf(`{"filename":"./logs/%s"}`, filename))
+	// logs.SetLogger("file", `{"filename":"./logs/server.log"}`)
+	D("Set wing logger as file output to", filename)
 }
 
 // SetLevel sets log message level.
