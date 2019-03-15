@@ -11,6 +11,7 @@
 package socket
 
 var (
+	ErrNotFound        = SocketResp{1001, "Not found"}
 	ErrUnexpectedError = SocketResp{1002, "Unexpected error"}
 	ErrInvalidRequest  = SocketResp{1003, "Invalid request data"}
 	Success            = SocketResp{0001, "OK"}

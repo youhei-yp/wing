@@ -48,7 +48,7 @@ type SocketController interface {
 
 // Init init socket.io handler
 func Init(ctrller SocketController) {
-	if controller == nil {
+	if ctrller == nil {
 		logger.E("Invalid socket controller!")
 		panic("Invalid socket controller!")
 	}
