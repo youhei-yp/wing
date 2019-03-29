@@ -15,6 +15,7 @@ import (
 	"crypto/md5"
 	crypto "crypto/rand"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/scrypt"
@@ -54,7 +55,12 @@ func ToMD5(src string) string {
 	ctx := md5.New()
 	ctx.Write([]byte(src))
 	cipher := ctx.Sum(nil)
-	return ToBase64String(cipher)
+	return hex.EncodeToString(cipher)
+}
+
+// ToBase64MD5 encodes string to md5 and transform to base64 string
+func ToBase64MD5(src string) string {
+	return ToBase64String([]byte(ToMD5(src)))
 }
 
 // GenSalt generates a random salt

@@ -19,6 +19,11 @@ import (
 	"wing/utils"
 )
 
+const (
+	// DSNUtf8Layout database source name layout for  utf8 charset
+	DSNUtf8Layout = "%s:%s@tcp(%s:%v)/%s?charset=utf8"
+)
+
 // OrmUtil : provides a named orm object to query or exec sql commend
 type OrmUtil struct {
 	Ormer   orm.Ormer // ormer object

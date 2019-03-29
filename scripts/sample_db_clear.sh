@@ -47,7 +47,10 @@ DELETE FROM account;
 # select * from account where drafts>10 limit 1000, 10;
 # select * from account where drafts>10 limit 10 offset 1000;
 # -> return 10 rows result start 1000 recode position
-#
+
+# ALTER TABLE table ADD column datatype;
+# e.g :
+# alter table account add code varchar(10) not null;
 
 # ALTER TABLE table MODIFY fromecolumn AFTER tocolumn
 # e.g :

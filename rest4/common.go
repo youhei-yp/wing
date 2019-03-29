@@ -90,9 +90,10 @@ func (r *Rest4Controller) RespUUID(uuid string) {
 }
 
 // RespToken response success with token
-func (r *Rest4Controller) RespToken(token string) {
+func (r *Rest4Controller) RespToken(token, pwd string) {
 	resp := Success
 	resp.Token = token
+	resp.More = pwd
 	r.RespData(resp)
 }
 
