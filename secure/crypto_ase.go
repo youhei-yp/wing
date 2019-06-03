@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"github.com/youhei-yp/wing/invar"
 	"math/rand"
 	"time"
-	"wing/invar"
 )
 
 /*

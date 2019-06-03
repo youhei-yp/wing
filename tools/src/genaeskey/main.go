@@ -12,8 +12,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/youhei-yp/wing/secure"
 	"os"
-	"wing/secure"
 )
 
 func main() {
