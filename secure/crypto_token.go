@@ -12,10 +12,10 @@ package secure
 
 import (
 	"fmt"
+	"github.com/youhei-yp/wing/invar"
 	"strconv"
 	"strings"
 	"time"
-	"wing/invar"
 )
 
 // GenLoginToken generate a login token with account and password

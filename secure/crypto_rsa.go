@@ -17,8 +17,8 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"github.com/youhei-yp/wing/invar"
 	"os"
-	"wing/invar"
 )
 
 /*

@@ -19,12 +19,12 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/bwmarrin/snowflake"
+	"github.com/youhei-yp/wing/invar"
 	"golang.org/x/crypto/scrypt"
 	"io"
 	"math/rand"
 	"strings"
 	"time"
-	"wing/invar"
 )
 
 const (
