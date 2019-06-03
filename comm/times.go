@@ -1,14 +1,14 @@
-// Copyright (c) 2018-2019 Xunmo All Rights Reserved.
+// Copyright (c) 2018-2019 Dunyu All Rights Reserved.
 //
 // Author : yangping
 // Email  : youhei_yp@163.com
 //
 // Prismy.No | Date       | Modified by. | Description
 // -------------------------------------------------------------------
-// 00001       2018/12/01   youhei         New version
+// 00001       2019/05/22   yangping       New version
 // -------------------------------------------------------------------
 
-package utils
+package comm
 
 import (
 	"time"
@@ -50,7 +50,7 @@ func IsSameTime(src string, des string) bool {
 	return st.Unix() == dt.Unix()
 }
 
-// TodayUnix return today date unix
+// TodayUnix return today unix time at 0:00:00
 func TodayUnix() int64 {
 	now := time.Now().Format(DateLayout)
 	st, _ := time.Parse(DateLayout, now)

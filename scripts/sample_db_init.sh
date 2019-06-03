@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2018-2019 Xunmo All Rights Reserved.
+# Copyright (c) 2018-2019 Dunyu All Rights Reserved.
 #
 # Author : yangping
 # Email  : youhei_yp@163.com

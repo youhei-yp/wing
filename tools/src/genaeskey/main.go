@@ -8,4 +8,16 @@
 // 00001       2019/05/22   yangping       New version
 // -------------------------------------------------------------------
 
-package wing
+package main
+
+import (
+	"fmt"
+	"os"
+	"wing/secure"
+)
+
+func main() {
+	secretkey := secure.GenAESKey()
+	fmt.Println(secretkey)
+	os.Exit(1)
+}

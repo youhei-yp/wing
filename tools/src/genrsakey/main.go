@@ -8,4 +8,17 @@
 // 00001       2019/05/22   yangping       New version
 // -------------------------------------------------------------------
 
-package wing
+package main
+
+import (
+	"fmt"
+	"os"
+	"wing/secure"
+)
+
+func main() {
+	prikey, pubkey, _ := secure.GenRSAKeys(1024)
+	fmt.Println(prikey)
+	fmt.Println(pubkey)
+	os.Exit(1)
+}

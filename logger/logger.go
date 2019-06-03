@@ -1,61 +1,86 @@
-// Copyright (c) 2018-2019 Xunmo All Rights Reserved.
+// Copyright (c) 2018-2019 Dunyu All Rights Reserved.
 //
 // Author : yangping
 // Email  : youhei_yp@163.com
 //
 // Prismy.No | Date       | Modified by. | Description
 // -------------------------------------------------------------------
-// 00001       2018/12/01   youhei         New version
+// 00001       2019/05/22   yangping       New version
 // -------------------------------------------------------------------
 
 package logger
 
 import (
-	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 )
 
-// Log levels to control the logging output.
 const (
-	Emergency = iota
-	Alert
-	Critical
-	Error
-	Warning
-	Notice
-	Informational
-	Debug
+	logConfigLevel   = "logger::level"   // configs key of logger level
+	logConfigMaxDays = "logger::maxdays" // configs key of logger max days
+
+	// LevelDebug debug level of logger
+	LevelDebug = "debug"
+
+	// LevelInfo info level of logger
+	LevelInfo = "info"
+
+	// LevelWarn warn level of logger
+	LevelWarn = "warn"
+
+	// LevelError error level of logger
+	LevelError = "error"
 )
 
-// current logger output level
-var currentLoggerLevel = Debug
-
+// init initialize app logger
 func init() {
-	beego.SetLevel(currentLoggerLevel)
+	config := getLoggerConfigs()
+	beego.SetLogger(logs.AdapterFile, config)
 	beego.SetLogFuncCall(true)
-	logs.SetLogger("console")
 	logs.SetLogFuncCallDepth(5)
-	D("Inited wing logger as console output")
+	logs.Async(3) // allow asynchronous
+
+	// set application logger level
+	switch beego.AppConfig.String(logConfigLevel) {
+	case LevelDebug:
+		beego.SetLevel(beego.LevelDebug)
+	case LevelInfo:
+		beego.SetLevel(beego.LevelInformational)
+	case LevelWarn:
+		beego.SetLevel(beego.LevelWarning)
+	case LevelError:
+		beego.SetLevel(beego.LevelError)
+	}
 }
 
-// SetLogger provides a given filename to logs a messagge to file.
-func SetLogger(filename string) {
-	logs.GetBeeLogger().DelLogger("file")
-	logs.SetLogger("file", fmt.Sprintf(`{"filename":"./logs/%s"}`, filename))
-	// logs.SetLogger("file", `{"filename":"./logs/server.log"}`)
-	D("Set wing logger as file output to", filename)
+// getLoggerConfigs get logger configs
+func getLoggerConfigs() string {
+	app := beego.BConfig.AppName
+	if app == "" || app == "beego" {
+		app = "wing"
+	}
+
+	maxdays := beego.AppConfig.String(logConfigMaxDays)
+	if maxdays == "" {
+		maxdays = "7"
+	}
+	return "{\"filename\":\"logs/" + app + ".log\", \"daily\":true, \"maxdays\":" + maxdays + "}"
 }
 
-// SetLevel sets log message level.
-func SetLevel(level int) {
-	currentLoggerLevel = level
-	beego.SetLevel(level)
-}
-
-// IsLevelEnabled check the given level if enabled
-func IsLevelEnabled(level int) bool {
-	return level >= currentLoggerLevel
+// GetLevel return current logger output level
+func GetLevel() string {
+	switch beego.BeeLogger.GetLevel() {
+	case beego.LevelDebug:
+		return LevelDebug
+	case beego.LevelInformational:
+		return LevelInfo
+	case beego.LevelWarning:
+		return LevelWarn
+	case beego.LevelError:
+		return LevelError
+	default:
+		return ""
+	}
 }
 
 // EM logs a message at emergency level.
