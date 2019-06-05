@@ -31,24 +31,30 @@ func main() {
 	}
 
 	switch *cmd {
-	case "rsa-k":
-		genRSAKeys()
 	case "rsa-e":
 		rsaEncrypt()
 	case "rsa-d":
 		rsaDecrypt()
-	case "aes-k":
-		genAESKey()
 	case "aes-e":
 		aesEncrypt()
 	case "aes-d":
 		aesDecrypt()
+	case "rsa-k":
+		genRSAKeys()
+	case "aes-k":
+		genAESKey()
 	case "uuid":
 		genUUID()
 	case "code":
 		genCode()
 	case "salt":
 		genSalt()
+	case "b64-e":
+		encodeBase64()
+	case "b64-d":
+		decodeBase64()
+	case "md5":
+		encodeMD5()
 	default:
 		showUseage()
 	}
@@ -58,7 +64,10 @@ func showUseage() {
 	log.Print(`
 	useage:
 	===========================================================
-	-c  command type, [rsa-k|rsa-e|rsa-d|aes-k|aes-e|aes-d|uuid|code|salt]
+	-c  command type, [
+			rsa-k | rsa-e | rsa-d | aes-k | aes-e | aes-d |
+			uuid  | code  | salt  | b64-e | b64-d | md5
+		]
 	-f  pem file path
 	-k  secure key content
 	-d	original data
@@ -69,11 +78,8 @@ func showUseage() {
 	./tools -c rsa-d -f ./prikey.pem -d ciphertext-base64
 	./tools -c aes-e -k secure-key   -d original
 	./tools -c aes-d -k secure-key   -d ciphertext-base64
-	./tools -c rsa-k
-	./tools -c aes-k
-	./tools -c uuid
-	./tools -c code
-	./tools -c salt
+	./tools -c [rsa-k|aes-k|uuid|code|salt]
+	./tools -c [b64-e|b64-d|md5]     -d data
 	`)
 }
 
@@ -195,4 +201,38 @@ func aesDecrypt() {
 		return
 	}
 	log.Println("Original:" + original)
+}
+
+func encodeBase64() {
+	if *data == "" {
+		showUseage()
+		return
+	}
+
+	encode := secure.EncodeBase64(*data)
+	log.Println("Encoded Base64:" + encode)
+}
+
+func decodeBase64() {
+	if *data == "" {
+		showUseage()
+		return
+	}
+
+	decode, err := secure.DecodeBase64(*data)
+	if err != nil {
+		log.Println("[ERR] invalid base64 data:" + err.Error())
+		return
+	}
+	log.Println("Decoded:" + decode)
+}
+
+func encodeMD5() {
+	if *data == "" {
+		showUseage()
+		return
+	}
+
+	encode := secure.EncodeMD5(*data)
+	log.Println("Encoded MD5:" + encode)
 }
