@@ -65,7 +65,7 @@ func (w *WingProvider) Stub() *sql.DB {
 
 // Query call sql.Query()
 func (w *WingProvider) Query(query string, args ...interface{}) (*sql.Rows, error) {
-	return w.Conn.Query(query, args)
+	return w.Conn.Query(query, args...)
 }
 
 // Prepare call sql.Prepare()
