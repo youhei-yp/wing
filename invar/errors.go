@@ -20,66 +20,161 @@ type WingErr struct {
 }
 
 var (
-	// ErrNotFound 0x1000, not fount
-	ErrNotFound = &WingErr{0x1000, errors.New("Not fount")}
+	// ErrNotFound not fount
+	ErrNotFound = errors.New("Not fount")
 
-	// ErrInvalidNum 0x1001, invalid number
-	ErrInvalidNum = &WingErr{0x1001, errors.New("Invalid number")}
+	// ErrInvalidNum invalid number
+	ErrInvalidNum = errors.New("Invalid number")
 
-	// ErrInvalidAccount 0x1002, invalid account
-	ErrInvalidAccount = &WingErr{0x1002, errors.New("Invalid account")}
+	// ErrInvalidAccount invalid account
+	ErrInvalidAccount = errors.New("Invalid account")
 
-	// ErrInvalidToken 0x1003, invalid token
-	ErrInvalidToken = &WingErr{0x1003, errors.New("Invalid token")}
+	// ErrInvalidToken invalid token
+	ErrInvalidToken = errors.New("Invalid token")
 
-	// ErrInvalidClient 0x1004, invalid client
-	ErrInvalidClient = &WingErr{0x1004, errors.New("Invalid client")}
+	// ErrInvalidClient invalid client
+	ErrInvalidClient = errors.New("Invalid client")
 
-	// ErrInvalidData 0x1005, invalid data
-	ErrInvalidData = &WingErr{0x1005, errors.New("Invalid data")}
+	// ErrInvalidDevice invalid device
+	ErrInvalidDevice = errors.New("Invalid device")
 
-	// ErrInvalidState 0x1006, invalid state
-	ErrInvalidState = &WingErr{0x1006, errors.New("Invalid state")}
+	// ErrInvalidParams invalid params
+	ErrInvalidParams = errors.New("Invalid params")
 
-	// ErrTagOffline 0x1007, target offline
-	ErrTagOffline = &WingErr{0x1007, errors.New("Target offline")}
+	// ErrInvalidData invalid data
+	ErrInvalidData = errors.New("Invalid data")
 
-	// ErrClientOffline 0x1008, client offline
-	ErrClientOffline = &WingErr{0x1008, errors.New("Client offline")}
+	// ErrInvalidState invalid state
+	ErrInvalidState = errors.New("Invalid state")
 
-	// ErrDupRegister 0x1009, duplicated registration
-	ErrDupRegister = &WingErr{0x1009, errors.New("Duplicated registration")}
+	// ErrTagOffline target offline
+	ErrTagOffline = errors.New("Target offline")
 
-	// ErrDupLogin 0x100A, duplicated admin login
-	ErrDupLogin = &WingErr{0x100A, errors.New("Duplicated admin login")}
+	// ErrClientOffline client offline
+	ErrClientOffline = errors.New("Client offline")
 
-	// ErrTokenExpired 0x100B, token expired
-	ErrTokenExpired = &WingErr{0x100B, errors.New("Token expired")}
+	// ErrDupRegister duplicated registration
+	ErrDupRegister = errors.New("Duplicated registration")
 
-	// ErrBadPublicKey 0x100C, invalid public key
-	ErrBadPublicKey = &WingErr{0x100C, errors.New("Invalid public key")}
+	// ErrDupLogin duplicated admin login
+	ErrDupLogin = errors.New("Duplicated admin login")
 
-	// ErrBadPrivateKey 0x100D, invalid private key
-	ErrBadPrivateKey = &WingErr{0x100D, errors.New("Invalid private key")}
+	// ErrDupData duplicate data
+	ErrDupData = errors.New("Duplicated data")
 
-	// ErrUnkownCharType 0x100E, unkown chars type
-	ErrUnkownCharType = &WingErr{0x100E, errors.New("Unkown chars type")}
+	// ErrTokenExpired token expired
+	ErrTokenExpired = errors.New("Token expired")
 
-	// ErrUnperparedState 0x100F, unperpared state
-	ErrUnperparedState = &WingErr{0x100F, errors.New("Unperpared state")}
+	// ErrBadPublicKey invalid public key
+	ErrBadPublicKey = errors.New("Invalid public key")
 
-	// ErrOrmNotUsing 0x10F0, orm not using
-	ErrOrmNotUsing = &WingErr{0x10F0, errors.New("Orm not using")}
+	// ErrBadPrivateKey invalid private key
+	ErrBadPrivateKey = errors.New("Invalid private key")
 
-	// ErrNoneRowFound 0x10F1, none row found
-	ErrNoneRowFound = &WingErr{0x10F1, errors.New("None row found")}
+	// ErrUnkownCharType unkown chars type
+	ErrUnkownCharType = errors.New("Unkown chars type")
 
-	// ErrSendFailed 0x10F2, failed to send(sms or mail)
-	ErrSendFailed = &WingErr{0x10F2, errors.New("Failed to send")}
+	// ErrUnperparedState unperpared state
+	ErrUnperparedState = errors.New("Unperpared state")
 
-	// ErrAuthDenied 0x10F3, permission denied
-	ErrAuthDenied = &WingErr{0x10F3, errors.New("Permission denied")}
+	// ErrOrmNotUsing orm not using
+	ErrOrmNotUsing = errors.New("Orm not using")
+
+	// ErrNoneRowFound none row found
+	ErrNoneRowFound = errors.New("None row found")
+
+	// ErrNotChanged not changed
+	ErrNotChanged = errors.New("Not changed")
+
+	// ErrNotInserted not inserted
+	ErrNotInserted = errors.New("Not inserted")
+
+	// ErrSendFailed failed to send(sms or mail)
+	ErrSendFailed = errors.New("Failed to send")
+
+	// ErrAuthDenied permission denied
+	ErrAuthDenied = errors.New("Permission denied")
 
 	// ErrKeyLenSixteen require sixteen-length secret key
-	ErrKeyLenSixteen = &WingErr{0x10F4, errors.New("Require sixteen-length secret key")}
+	ErrKeyLenSixteen = errors.New("Require sixteen-length secret key")
+)
+
+var (
+	// WErrNotFound 0x1000, not fount
+	WErrNotFound = &WingErr{0x1000, ErrNotFound}
+
+	// WErrInvalidNum 0x1001, invalid number
+	WErrInvalidNum = &WingErr{0x1001, ErrInvalidNum}
+
+	// WErrInvalidAccount 0x1002, invalid account
+	WErrInvalidAccount = &WingErr{0x1002, ErrInvalidAccount}
+
+	// WErrInvalidToken 0x1003, invalid token
+	WErrInvalidToken = &WingErr{0x1003, ErrInvalidToken}
+
+	// WErrInvalidClient 0x1004, invalid client
+	WErrInvalidClient = &WingErr{0x1004, ErrInvalidClient}
+
+	// WErrInvalidDevice 0x1005, invalid device
+	WErrInvalidDevice = &WingErr{0x1005, ErrInvalidDevice}
+
+	// WErrInvalidParams 0x1006, invalid params
+	WErrInvalidParams = &WingErr{0x1006, ErrInvalidParams}
+
+	// WErrInvalidData 0x1007, invalid data
+	WErrInvalidData = &WingErr{0x1007, ErrInvalidData}
+
+	// WErrInvalidState 0x1008, invalid state
+	WErrInvalidState = &WingErr{0x1008, ErrInvalidState}
+
+	// WErrTagOffline 0x1009, target offline
+	WErrTagOffline = &WingErr{0x1009, ErrTagOffline}
+
+	// WErrClientOffline 0x100A, client offline
+	WErrClientOffline = &WingErr{0x100A, ErrClientOffline}
+
+	// WErrDupRegister 0x100B, duplicated registration
+	WErrDupRegister = &WingErr{0x100B, ErrDupRegister}
+
+	// WErrDupLogin 0x100C, duplicated admin login
+	WErrDupLogin = &WingErr{0x100C, ErrDupLogin}
+
+	// WErrDupData 0x100D, duplicated data
+	WErrDupData = &WingErr{0x100D, ErrDupData}
+
+	// WErrTokenExpired 0x100E, token expired
+	WErrTokenExpired = &WingErr{0x100E, ErrTokenExpired}
+
+	// WErrBadPublicKey 0x100F, invalid public key
+	WErrBadPublicKey = &WingErr{0x100F, ErrBadPublicKey}
+
+	// WErrBadPrivateKey 0x1010, invalid private key
+	WErrBadPrivateKey = &WingErr{0x1010, ErrBadPrivateKey}
+
+	// WErrUnkownCharType 0x1011, unkown chars type
+	WErrUnkownCharType = &WingErr{0x1011, ErrUnkownCharType}
+
+	// WErrUnperparedState 0x1012, unperpared state
+	WErrUnperparedState = &WingErr{0x1012, ErrUnperparedState}
+
+	// WErrOrmNotUsing 0x1013, orm not using
+	WErrOrmNotUsing = &WingErr{0x1013, ErrOrmNotUsing}
+
+	// WErrNoneRowFound 0x1014, none row found
+	WErrNoneRowFound = &WingErr{0x1014, ErrNoneRowFound}
+
+	// WErrNotChanged 0x1015, not changed
+	WErrNotChanged = &WingErr{0x1015, ErrNotChanged}
+
+	// WErrNotInserted 0x1016, not inserted
+	WErrNotInserted = &WingErr{0x1016, ErrNotInserted}
+
+	// WErrSendFailed 0x1017, failed to send(sms or mail)
+	WErrSendFailed = &WingErr{0x1017, ErrSendFailed}
+
+	// WErrAuthDenied 0x1018, permission denied
+	WErrAuthDenied = &WingErr{0x1018, ErrAuthDenied}
+
+	// WErrKeyLenSixteen 0x1019, require sixteen-length secret key
+	WErrKeyLenSixteen = &WingErr{0x1019, ErrKeyLenSixteen}
 )

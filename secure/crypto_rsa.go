@@ -136,7 +136,7 @@ func LoadRSAKey(filepath string, buffbits int) ([]byte, error) {
 func RSAEncrypt(pubkey, original []byte) ([]byte, error) {
 	block, _ := pem.Decode(pubkey)
 	if block == nil {
-		return nil, invar.ErrBadPublicKey.Err
+		return nil, invar.ErrBadPublicKey
 	}
 
 	pubinterface, err := x509.ParsePKIXPublicKey(block.Bytes)
@@ -151,7 +151,7 @@ func RSAEncrypt(pubkey, original []byte) ([]byte, error) {
 func RSADecrypt(prikey, ciphertext []byte) ([]byte, error) {
 	block, _ := pem.Decode(prikey)
 	if block == nil {
-		return nil, invar.ErrBadPrivateKey.Err
+		return nil, invar.ErrBadPrivateKey
 	}
 
 	pri, err := x509.ParsePKCS1PrivateKey(block.Bytes)
@@ -165,7 +165,7 @@ func RSADecrypt(prikey, ciphertext []byte) ([]byte, error) {
 func RSASign(prikey, original []byte) ([]byte, error) {
 	block, _ := pem.Decode(prikey)
 	if block == nil {
-		return nil, invar.ErrBadPrivateKey.Err
+		return nil, invar.ErrBadPrivateKey
 	}
 
 	pri, err := x509.ParsePKCS1PrivateKey(block.Bytes)
@@ -181,7 +181,7 @@ func RSASign(prikey, original []byte) ([]byte, error) {
 func RSAVerify(pubkey, original, signature []byte) error {
 	block, _ := pem.Decode(pubkey)
 	if block == nil {
-		return invar.ErrBadPublicKey.Err
+		return invar.ErrBadPublicKey
 	}
 
 	pubinterface, err := x509.ParsePKIXPublicKey(block.Bytes)

@@ -12,9 +12,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/youhei-yp/wing/secure"
 	"log"
 	"os"
+	"time"
 )
 
 var cmd = flag.String("c", "", "command type")
@@ -55,6 +57,8 @@ func main() {
 		decodeBase64()
 	case "md5":
 		encodeMD5()
+	case "time":
+		unixTime()
 	default:
 		showUseage()
 	}
@@ -66,7 +70,8 @@ func showUseage() {
 	===========================================================
 	-c  command type, [
 			rsa-k | rsa-e | rsa-d | aes-k | aes-e | aes-d |
-			uuid  | code  | salt  | b64-e | b64-d | md5
+			uuid  | code  | salt  | b64-e | b64-d | md5   |
+			time
 		]
 	-f  pem file path
 	-k  secure key content
@@ -235,4 +240,11 @@ func encodeMD5() {
 
 	encode := secure.EncodeMD5(*data)
 	log.Println("Encoded MD5:" + encode)
+}
+
+func unixTime() {
+	now := time.Now().UnixNano()
+	s := now / (int64)(time.Second)
+	n := now % (int64)(time.Second)
+	log.Println("Current time:" + fmt.Sprintf("%v.%v", s, n))
 }

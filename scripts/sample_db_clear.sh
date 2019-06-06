@@ -7,7 +7,7 @@
 #
 # Prismy.No | Date       | Modified by. | Description
 # -------------------------------------------------------------------
-# 00001       2018/12/01   youhei         New version
+# 00001       2019/05/22   yangping       New version
 # -------------------------------------------------------------------
 
 usage="Usage: clear.sh (database user)"

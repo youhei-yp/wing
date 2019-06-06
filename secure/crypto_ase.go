@@ -169,7 +169,7 @@ func GenAESKey() string {
 // AESEncrypt using secret key to encrypt original data
 func AESEncrypt(secretkey, original []byte) (string, error) {
 	if len(secretkey) != aesKeyLength {
-		return "", invar.ErrKeyLenSixteen.Err
+		return "", invar.ErrKeyLenSixteen
 	}
 
 	hashed := HashMD5(secretkey)
@@ -188,7 +188,7 @@ func AESEncrypt(secretkey, original []byte) (string, error) {
 // AESDecrypt using secret key to decrypt ciphertext
 func AESDecrypt(secretkey []byte, ciphertextb64 string) (string, error) {
 	if len(secretkey) != aesKeyLength {
-		return "", invar.ErrKeyLenSixteen.Err
+		return "", invar.ErrKeyLenSixteen
 	}
 
 	hashed := HashMD5(secretkey)

@@ -95,7 +95,7 @@ func GenOAuthCode(length int, randomType string) (string, error) {
 	str := buf.String()
 	len := len(str)
 	if len == 0 {
-		return "", invar.ErrUnkownCharType.Err
+		return "", invar.ErrUnkownCharType
 	}
 
 	// random OAuth code

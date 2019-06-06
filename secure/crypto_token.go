@@ -73,7 +73,7 @@ func ViaLoginToken(acc, pwd, token string, duration int64) (bool, error) {
 		if time.Now().UnixNano()-latest <= duration {
 			return true, nil
 		}
-		return false, invar.ErrTokenExpired.Err
+		return false, invar.ErrTokenExpired
 	}
 	return false, nil
 }
