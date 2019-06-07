@@ -97,6 +97,9 @@ var (
 
 	// ErrKeyLenSixteen require sixteen-length secret key
 	ErrKeyLenSixteen = errors.New("Require sixteen-length secret key")
+
+	// ErrOverTimes over retry times
+	ErrOverTimes = errors.New("Over retry times")
 )
 
 var (
@@ -177,4 +180,7 @@ var (
 
 	// WErrKeyLenSixteen 0x1019, require sixteen-length secret key
 	WErrKeyLenSixteen = &WingErr{0x1019, ErrKeyLenSixteen}
+
+	// WErrOverTimes 0x101A over try times
+	WErrOverTimes = &WingErr{0x101A, ErrOverTimes}
 )
