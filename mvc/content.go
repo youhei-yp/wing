@@ -92,37 +92,38 @@ func (w *WingProvider) Affected(result sql.Result) error {
 // [CODE:]
 // sets := w.FormatSets(struct {
 //     StringFiled string
+//     EmptyString string
+//     BlankString string
+//     TrimString  string
 //     IntFiled    int
 //     I32Filed    int32
 //     I64Filed    int64
 //     F32Filed    float32
 //     F64Filed    float64
 //     BoolFiled   bool
-// }{"string filed value", 123, 32, 64, 32.123, 64.123, true})
-// logger.I("sets:", sets) // sets: stringfiled='string filed value', intfiled=123, i32filed=32, i64filed=64, F32Filed=32.123, F64Filed=64.123, boolfiled=true
+// }{"string", "", " ", " trim ", 123, 32, 64, 32.123, 64.123, true})
+//
+// //sets: stringfiled='string', trimstring='trim', intfiled=123, i32filed=32, i64filed=64, f32filed=32.123, f64filed=64.123, boolfiled=true
+// logger.I("sets:", sets)
 // [CODE]
 func (w *WingProvider) FormatSets(updates interface{}) string {
 	sets := []string{}
-
 	keys, values := reflect.TypeOf(updates), reflect.ValueOf(updates)
 	for i := 0; i < keys.NumField(); i++ {
 		name := strings.ToLower(keys.Field(i).Name)
+		if name == "" {
+			continue
+		}
+
 		value := values.Field(i).Interface()
 		switch value.(type) {
 		case string:
-			sets = append(sets, fmt.Sprintf(name+"='%s'", value.(string)))
-		case int:
-			sets = append(sets, fmt.Sprintf(name+"=%d", value.(int)))
-		case int32:
-			sets = append(sets, fmt.Sprintf(name+"=%d", value.(int32)))
-		case int64:
-			sets = append(sets, fmt.Sprintf(name+"=%d", value.(int64)))
-		case float32:
-			sets = append(sets, fmt.Sprintf(name+"=%v", value.(float32)))
-		case float64:
-			sets = append(sets, fmt.Sprintf(name+"=%v", value.(float64)))
-		case bool:
-			sets = append(sets, fmt.Sprintf(name+"=%v", value.(bool)))
+			trimvalue := strings.Trim(value.(string), " ")
+			if trimvalue != "" {
+				sets = append(sets, fmt.Sprintf(name+"='%s'"), trimvalue)
+			}
+		case int, int8, int16, int32, int64, float32, float64, bool:
+			sets = append(sets, fmt.Sprintf(name+"=%v", value))
 		}
 	}
 	return strings.Join(sets, ", ")
