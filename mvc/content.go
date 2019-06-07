@@ -94,19 +94,20 @@ func (w *WingProvider) Affected(result sql.Result) error {
 //     StringFiled string
 //     IntFiled    int
 //     I32Filed    int32
-//     I6464Filed  int64
+//     I64Filed    int64
 //     F32Filed    float32
 //     F64Filed    float64
 //     BoolFiled   bool
 // }{"string filed value", 123, 32, 64, 32.123, 64.123, true})
-// logger.I("sets:", sets)
+// logger.I("sets:", sets) // sets: stringfiled='string filed value', intfiled=123, i32filed=32, i64filed=64, F32Filed=32.123, F64Filed=64.123, boolfiled=true
 // [CODE]
 func (w *WingProvider) FormatSets(updates interface{}) string {
 	sets := []string{}
 
 	keys, values := reflect.TypeOf(updates), reflect.ValueOf(updates)
 	for i := 0; i < keys.NumField(); i++ {
-		name, value := keys.Field(i).Name, values.Field(i).Interface()
+		name := strings.ToLower(keys.Field(i).Name)
+		value := values.Field(i).Interface()
 		switch value.(type) {
 		case string:
 			sets = append(sets, fmt.Sprintf(name+"='%s'", value.(string)))
