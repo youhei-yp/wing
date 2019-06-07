@@ -15,6 +15,8 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/youhei-yp/wing/invar"
+	"reflect"
+	"strings"
 )
 
 // WingProvider content provider to support database utils
@@ -84,4 +86,43 @@ func (w *WingProvider) Affected(result sql.Result) error {
 		return invar.ErrNotChanged
 	}
 	return nil
+}
+
+// FormatSets format update sets for sql update
+// [CODE:]
+// sets := w.FormatSets(struct {
+//     StringFiled string
+//     IntFiled    int
+//     I32Filed    int32
+//     I6464Filed  int64
+//     F32Filed    float32
+//     F64Filed    float64
+//     BoolFiled   bool
+// }{"string filed value", 123, 32, 64, 32.123, 64.123, true})
+// logger.I("sets:", sets)
+// [CODE]
+func (w *WingProvider) FormatSets(updates interface{}) string {
+	sets := []string{}
+
+	keys, values := reflect.TypeOf(updates), reflect.ValueOf(updates)
+	for i := 0; i < keys.NumField(); i++ {
+		name, value := keys.Field(i).Name, values.Field(i).Interface()
+		switch value.(type) {
+		case string:
+			sets = append(sets, fmt.Sprintf(name+"='%s'", value.(string)))
+		case int:
+			sets = append(sets, fmt.Sprintf(name+"=%d", value.(int)))
+		case int32:
+			sets = append(sets, fmt.Sprintf(name+"=%d", value.(int32)))
+		case int64:
+			sets = append(sets, fmt.Sprintf(name+"=%d", value.(int64)))
+		case float32:
+			sets = append(sets, fmt.Sprintf(name+"=%v", value.(float32)))
+		case float64:
+			sets = append(sets, fmt.Sprintf(name+"=%v", value.(float64)))
+		case bool:
+			sets = append(sets, fmt.Sprintf(name+"=%v", value.(bool)))
+		}
+	}
+	return strings.Join(sets, ", ")
 }
