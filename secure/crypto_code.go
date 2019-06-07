@@ -21,7 +21,7 @@ import (
  * Useage as follows:
  *
  * [CODE:]
- * coder := mvc.NewSoleCoder(nil)
+ * coder := mvc.NewSoleCoder()
  * code, _ := coder.Gen(6)
  * logger.I("6 chars code:", code)
  *
@@ -42,13 +42,19 @@ type SoleCoder struct {
 }
 
 // NewSoleCoder create SoleCoder and init with exist codes
-func NewSoleCoder(data []string) *SoleCoder {
+func NewSoleCoder(data ...[]string) *SoleCoder {
 	coder := &SoleCoder{
 		codes: make(map[string]bool),
 	}
-	if data != nil && len(data) > 0 {
-		for _, code := range data {
-			coder.codes[code] = true
+
+	datalen := len(data)
+	if datalen > 0 {
+		for i := 0; i < datalen; i++ {
+			if data[i] != nil && len(data[i]) > 0 {
+				for _, code := range data[i] {
+					coder.codes[code] = true
+				}
+			}
 		}
 	}
 	return coder
