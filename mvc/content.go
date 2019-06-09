@@ -14,7 +14,6 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/astaxie/beego"
-	"github.com/youhei-yp/wing/comm"
 	"github.com/youhei-yp/wing/invar"
 	"reflect"
 	"strings"
@@ -141,7 +140,7 @@ func (w *WingProvider) FormatSets(updates interface{}) string {
 			}
 		case int, int8, int16, int32, int64, float32, float64, bool:
 			sets = append(sets, fmt.Sprintf(name+"=%v", value))
-		case comm.Status, comm.Box, comm.Role, comm.Limit:
+		case invar.Status, invar.Box, invar.Role, invar.Limit:
 			sets = append(sets, fmt.Sprintf(name+"=%v", value))
 		}
 	}
