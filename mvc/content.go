@@ -14,6 +14,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/astaxie/beego"
+	"github.com/youhei-yp/wing/comm"
 	"github.com/youhei-yp/wing/invar"
 	"reflect"
 	"strings"
@@ -75,9 +76,25 @@ func (w *WingProvider) Prepare(query string) (*sql.Stmt, error) {
 	return w.Conn.Prepare(query)
 }
 
-// AppendLimit append page limitation end of sql string
-func (w *WingProvider) AppendLimit(sql string, page int) string {
-	return fmt.Sprintf("%s LIMIT %d, %d", sql, page*limitPageItems, limitPageItems)
+// AppendLike append like keyword end of sql string,
+// DON'T call it after AppendLimit()
+func (w *WingProvider) AppendLike(query, filed, keyword string, and ...bool) string {
+	if len(and) > 0 && and[0] {
+		return query + " AND " + filed + " LIKE '%%" + keyword + "%%'"
+	}
+	return query + " WHERE " + filed + " LIKE '%%" + keyword + "%%'"
+}
+
+// AppendLimit append page limitation end of sql string,
+// DON'T call it before AppendLick()
+func (w *WingProvider) AppendLimit(query string, page int) string {
+	offset, items := page*limitPageItems, limitPageItems
+	return query + " LIMIT " + fmt.Sprintf("%d, %d", offset, items)
+}
+
+// AppendLikeLimit append like keyword and limit end of sql string
+func (w *WingProvider) AppendLikeLimit(query, filed, keyword string, page int, and ...bool) string {
+	return w.AppendLimit(w.AppendLike(query, filed, keyword, and...), page)
 }
 
 // CheckAffected append page limitation end of sql string
@@ -120,9 +137,11 @@ func (w *WingProvider) FormatSets(updates interface{}) string {
 		case string:
 			trimvalue := strings.Trim(value.(string), " ")
 			if trimvalue != "" {
-				sets = append(sets, fmt.Sprintf(name+"='%s'"), trimvalue)
+				sets = append(sets, fmt.Sprintf(name+"='%s'", trimvalue))
 			}
 		case int, int8, int16, int32, int64, float32, float64, bool:
+			sets = append(sets, fmt.Sprintf(name+"=%v", value))
+		case comm.Status, comm.Box, comm.Role, comm.Limit:
 			sets = append(sets, fmt.Sprintf(name+"=%v", value))
 		}
 	}
