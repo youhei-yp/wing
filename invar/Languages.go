@@ -198,3 +198,8 @@ func init() {
 func GetLanguage(code Lang) *Language {
 	return languagesCache[code]
 }
+
+// IsValidLang check the given language code if valid
+func IsValidLang(code Lang) bool {
+	return code >= Lang_ar_IL && code <= Lang_si_LK
+}
