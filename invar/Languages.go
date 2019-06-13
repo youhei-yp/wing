@@ -10,6 +10,10 @@
 
 package invar
 
+import (
+	"strings"
+)
+
 // Lang language code type
 type Lang int
 
@@ -109,6 +113,14 @@ type Language struct {
 // languagesCache languages information cache
 var languagesCache = make(map[Lang]*Language)
 
+const (
+	// InvalidLangCode invalid language code
+	InvalidLangCode Lang = -1
+
+	// LangsSeparator multi-langguages separator
+	LangsSeparator = ","
+)
+
 func init() {
 	languagesCache[Lang_ar_IL] = &Language{Lang_ar_IL, "ar_IL", "Arabic(Israel)", "阿拉伯语(以色列)"}
 	languagesCache[Lang_ar_EG] = &Language{Lang_ar_EG, "ar_EG", "Arabic(Egypt)", "阿拉伯语(埃及)"}
@@ -199,7 +211,55 @@ func GetLanguage(code Lang) *Language {
 	return languagesCache[code]
 }
 
+// GetLangCode get language code by key
+func GetLangCode(key string) Lang {
+	for _, lang := range languagesCache {
+		if lang.Key == key {
+			return lang.Code
+		}
+	}
+	return InvalidLangCode
+}
+
 // IsValidLang check the given language code if valid
 func IsValidLang(code Lang) bool {
 	return code >= Lang_ar_IL && code <= Lang_si_LK
+}
+
+// AppendLangs append a language key to multi-language string
+func AppendLangs(langs string, lang Lang) string {
+	langkey := GetLanguage(lang).Key
+	langsarr := strings.Split(langs, LangsSeparator)
+	for _, existlang := range langsarr {
+		if existlang == langkey {
+			return langs // already exist language
+		}
+	}
+	langsarr = append(langsarr, langkey)
+	return strings.Join(langsarr, LangsSeparator)
+}
+
+// RemoveLangs remove a language key outof multi-language string
+func RemoveLangs(langs string, lang Lang) string {
+	langkey := GetLanguage(lang).Key
+	langsarr := strings.Split(langs, LangsSeparator)
+	for i, existlang := range langsarr {
+		if existlang == langkey {
+			last := append(langsarr[:i], langsarr[i+1:]...)
+			return strings.Join(last, LangsSeparator)
+		}
+	}
+	return langs
+}
+
+// IsContain check the language if exist in multi-language string
+func IsContain(langs string, lang Lang) bool {
+	langkey := GetLanguage(lang).Key
+	langsarr := strings.Split(langs, LangsSeparator)
+	for _, existlang := range langsarr {
+		if existlang == langkey {
+			return true
+		}
+	}
+	return false
 }
