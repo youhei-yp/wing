@@ -11,7 +11,7 @@
 package wing
 
 // package main
-//
+
 // import (
 // 	_ "github.com/youhei-yp/wing/comm"
 // 	_ "github.com/youhei-yp/wing/invar"
@@ -19,5 +19,5 @@ package wing
 // 	_ "github.com/youhei-yp/wing/mvc"
 // 	_ "github.com/youhei-yp/wing/secure"
 // )
-//
+
 // func main() {}

@@ -82,8 +82,8 @@ func SaveB64File(filepath, filename string, b64data string) error {
 	return SaveFile(filepath, filename, []byte(data))
 }
 
-// DelteFile delete file
-func DelteFile(file string) error {
+// DeleteFile delete file
+func DeleteFile(file string) error {
 	// ensure file exist
 	if _, err := os.Stat(file); err != nil {
 		if os.IsNotExist(err) {
