@@ -14,6 +14,35 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
+/*
+ * Useage
+ *
+ * [CODE:]
+ * mailTempleteSubject = "You hava a mail！"
+ * mailTemplateFormat  = `
+ *	<p>
+ *		<span font-weight:bold; style="font-size:16px; color:#363636">Dear</span><br><br>
+ *		<span style="font-size:14px; color:#484848">Your account %s have not activate, please click the follow link to activate it.</span><br>
+ *		<span style="font-size:14px; color:#484848">%s</span><br>
+ *	</p>
+ *	<p align="right">
+ *		<span style="font-size:12px; color:#484848">From %s</span><br>
+ *		<span style="font-size:10px; color:#636363">%s</span>
+ *	</p>
+ *	`
+ *
+ * mailagent = &comm.MailAgent{
+ *     Acc: account, Pwd: password, Host: smtphost, Port: smtpport,
+ * }
+ * subject := mailTempleteSubject
+ * message := fmt.Sprintf(mailTemplateFormat, account, link, who,
+ *     time.Now().Format(templateTimeFormat))
+ * // send mail with attachment
+ * // return ma.SendMail(to, subject, message, fileName)
+ * return ma.SendMail(to, subject, message)
+ * [CODE]
+ */
+
 // MailAgent mail agent informations
 type MailAgent struct {
 	Acc  string `json:"acc"`  // username - mail address
