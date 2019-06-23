@@ -24,9 +24,13 @@ type WingController struct {
 
 // ResponJSON sends a json response to client
 func (c *WingController) ResponJSON(state int, data ...interface{}) {
+	if state != http.StatusOK {
+		c.ErrorState(state)
+		return
+	}
+
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:", state, ">", ctl+"."+act)
-
 	c.Ctx.Output.Status = state
 	if len(data) > 0 {
 		c.Data["json"] = data[0]
@@ -36,9 +40,13 @@ func (c *WingController) ResponJSON(state int, data ...interface{}) {
 
 // ResponJSONP sends a jsonp response to client
 func (c *WingController) ResponJSONP(state int, data ...interface{}) {
+	if state != http.StatusOK {
+		c.ErrorState(state)
+		return
+	}
+
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:", state, ">", ctl+"."+act)
-
 	c.Ctx.Output.Status = state
 	if len(data) > 0 {
 		c.Data["jsonp"] = data[0]
@@ -48,9 +56,13 @@ func (c *WingController) ResponJSONP(state int, data ...interface{}) {
 
 // ResponXML sends xml response to client
 func (c *WingController) ResponXML(state int, data ...interface{}) {
+	if state != http.StatusOK {
+		c.ErrorState(state)
+		return
+	}
+
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:", state, ">", ctl+"."+act)
-
 	c.Ctx.Output.Status = state
 	if len(data) > 0 {
 		c.Data["xml"] = data[0]
@@ -60,9 +72,13 @@ func (c *WingController) ResponXML(state int, data ...interface{}) {
 
 // ResponYAML sends yaml response to client
 func (c *WingController) ResponYAML(state int, data ...interface{}) {
+	if state != http.StatusOK {
+		c.ErrorState(state)
+		return
+	}
+
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:", state, ">", ctl+"."+act)
-
 	c.Ctx.Output.Status = state
 	if len(data) > 0 {
 		c.Data["yaml"] = data[0]
@@ -72,9 +88,13 @@ func (c *WingController) ResponYAML(state int, data ...interface{}) {
 
 // ResponData sends YAML, XML OR JSON, depending on the value of the Accept header
 func (c *WingController) ResponData(state int, data ...map[interface{}]interface{}) {
+	if state != http.StatusOK {
+		c.ErrorState(state)
+		return
+	}
+
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:", state, ">", ctl+"."+act)
-
 	c.Ctx.Output.Status = state
 	if len(data) > 0 {
 		c.Data = data[0]
