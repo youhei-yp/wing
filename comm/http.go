@@ -12,25 +12,32 @@ package comm
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/youhei-yp/wing/invar"
 	"github.com/youhei-yp/wing/logger"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 )
 
 const (
 	// ContentTypeJson json content type
 	ContentTypeJson = "application/json;charset=UTF-8"
+
+	// ContentTypeForm form content type
+	ContentTypeForm = "application/x-www-form-urlencoded"
 )
 
 // HttpGet handle http get method
-func HttpGet(url string, params ...interface{}) ([]byte, error) {
+func HttpGet(tagurl string, params ...interface{}) ([]byte, error) {
 	if len(params) > 0 {
-		url = fmt.Sprintf(url, params...)
+		tagurl = fmt.Sprintf(tagurl, params...)
 	}
 
-	resp, err := http.Get(url)
+	resp, err := http.Get(tagurl)
 	if err != nil {
 		logger.E("Handle http get err:", err)
 		return nil, err
@@ -42,19 +49,138 @@ func HttpGet(url string, params ...interface{}) ([]byte, error) {
 		logger.E("Read get response err:", err)
 		return nil, err
 	}
-	logger.I("Handled http get:", url)
+	logger.I("Handled http get:", tagurl)
 	return body, nil
 }
 
-// HttpPost handle http post method
-func HttpPost(url string, postdata interface{}) ([]byte, error) {
+// HttpPost handle http post method, you can set content type as
+// comm.ContentTypeJson or comm.ContentTypeForm, or other you need set.
+// [CODE:]
+//     // set post data as json string
+//     data := struct {"key": "Value", "id": "123"}
+//     resp, err := comm.HttpPost(tagurl, data)
+//
+//     // set post data as form string
+//     data := "key=Value&id=123"
+//     resp, err := comm.HttpPost(tagurl, data, comm.ContentTypeForm)
+// [CODE]
+func HttpPost(tagurl string, postdata interface{}, contentType ...string) ([]byte, error) {
+	ct := ContentTypeJson
+	if len(contentType) > 0 {
+		ct = contentType[0]
+	}
+
+	switch ct {
+	case ContentTypeJson:
+		httpPostJson(tagurl, postdata)
+	case ContentTypeForm:
+		httpPostForm(tagurl, postdata.(url.Values))
+	}
+	return nil, invar.ErrInvalidParams
+}
+
+// HttpGetStruct handle http get method and unmarshal data to struct object
+func HttpGetStruct(tagurl string, out interface{}, params ...interface{}) error {
+	body, err := HttpGet(tagurl, params...)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(body, out); err != nil {
+		logger.E("Unmarshal bady to struct err:", err)
+		return err
+	}
+	return nil
+}
+
+// HttpPostStruct handle http post method and unmarshal data to struct object
+func HttpPostStruct(tagurl string, postdata, out interface{}, contentType ...string) error {
+	body, err := HttpPost(tagurl, postdata, contentType...)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(body, out); err != nil {
+		logger.E("Unmarshal bady to struct err:", err)
+		return err
+	}
+	return nil
+}
+
+// HttpClientGet handle get by http.Client, you can set useTLS to enable TLS or not
+func HttpClientGet(tagurl string, useTLS bool, params ...interface{}) ([]byte, error) {
+	if len(params) > 0 {
+		tagurl = fmt.Sprintf(tagurl, params...)
+	}
+
+	req, err := http.NewRequest("GET", tagurl, http.NoBody)
+	if err != nil {
+		logger.E("Create http request err:", err)
+		return nil, err
+	}
+	return httpClientDo(req, useTLS)
+}
+
+// HttpClientGet handle post by http.Client, you can set useTLS to enable TLS or not
+func HttpClientPost(tagurl string, useTLS bool, postdata ...interface{}) ([]byte, error) {
+	var body io.Reader
+	if len(postdata) > 0 {
+		params, err := json.Marshal(postdata)
+		if err != nil {
+			logger.E("Marshal post data err:", err)
+			return nil, err
+		}
+		body = bytes.NewReader(params)
+	} else {
+		body = http.NoBody
+	}
+
+	req, err := http.NewRequest("POST", tagurl, body)
+	if err != nil {
+		logger.E("Create http request err:", err)
+		return nil, err
+	}
+	req.Header.Set("Content-Type", ContentTypeJson)
+	return httpClientDo(req, useTLS)
+}
+
+// HttpClientGetStruct handle http get method and unmarshal data to struct object
+func HttpClientGetStruct(tagurl string, useTLS bool, out interface{}, params ...interface{}) error {
+	body, err := HttpClientGet(tagurl, useTLS, params...)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(body, out); err != nil {
+		logger.E("Unmarshal bady to struct err:", err)
+		return err
+	}
+	return nil
+}
+
+// HttpClientPostStruct handle http post method and unmarshal data to struct object
+func HttpClientPostStruct(tagurl string, useTLS bool, out interface{}, postdata ...interface{}) error {
+	body, err := HttpClientPost(tagurl, useTLS, postdata...)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(body, out); err != nil {
+		logger.E("Unmarshal bady to struct err:", err)
+		return err
+	}
+	return nil
+}
+
+// httpPostJson http post method, you can set post data as json struct.
+func httpPostJson(tagurl string, postdata interface{}) ([]byte, error) {
 	params, err := json.Marshal(postdata)
 	if err != nil {
 		logger.E("Marshal post data err:", err)
 		return nil, err
 	}
 
-	resp, err := http.Post(url, ContentTypeJson, bytes.NewReader(params))
+	resp, err := http.Post(tagurl, ContentTypeJson, bytes.NewReader(params))
 	if err != nil {
 		logger.E("Handle http post err:", err)
 		return nil, err
@@ -66,34 +192,49 @@ func HttpPost(url string, postdata interface{}) ([]byte, error) {
 		logger.E("Read post response err:", err)
 		return nil, err
 	}
-	logger.I("Handled http post:", url, "params:", postdata)
+	logger.I("Handled http post:", tagurl, "data:", postdata)
 	return body, nil
 }
 
-// HttpGetStruct handle http get method and unmarshal data to struct object
-func HttpGetStruct(url string, out interface{}, params ...interface{}) error {
-	body, err := HttpGet(url, params...)
+// httpPostForm http post method, you can set post data as url.Values.
+func httpPostForm(tagurl string, postdata url.Values) ([]byte, error) {
+	resp, err := http.PostForm(tagurl, postdata)
 	if err != nil {
-		return err
+		logger.E("Handle http post err:", err)
+		return nil, err
 	}
+	defer resp.Body.Close()
 
-	if err := json.Unmarshal(body, out); err != nil {
-		logger.E("Unmarshal dady to struct err:", err)
-		return err
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		logger.E("Read post response err:", err)
+		return nil, err
 	}
-	return nil
+	logger.I("Handled http post:", tagurl, "data:", postdata)
+	return body, nil
 }
 
-// HttpPostStruct handle http post method and unmarshal data to struct object
-func HttpPostStruct(url string, postdata, out interface{}) error {
-	body, err := HttpPost(url, postdata)
-	if err != nil {
-		return err
+// httpClientDo handle http client DO method, and return response.
+func httpClientDo(req *http.Request, useTLS bool) ([]byte, error) {
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: !useTLS,
+			},
+		},
 	}
 
-	if err := json.Unmarshal(body, out); err != nil {
-		logger.E("Unmarshal dady to struct err:", err)
-		return err
+	resp, err := client.Do(req)
+	if err != nil {
+		logger.E("Execute client DO err:", err)
+		return nil, err
 	}
-	return nil
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		logger.E("Read client DO response err:", err)
+		return nil, err
+	}
+	return body, nil
 }
