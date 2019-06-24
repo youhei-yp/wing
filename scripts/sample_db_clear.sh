@@ -26,7 +26,7 @@ LOGIN_USER=$1
 # YOU MUST CHANGE database_sample TO YOUR DATABASE NAME   #
 # e.g: APP_DATABASE_NAME="xappdb"                         #
 # ------------------------------------------------------- #
-APP_DATABASE_NAME="database_sample"
+APP_DATABASE_NAME="xappdb"
 
 # execute clear script
 mysql -u$LOGIN_USER -p -e "
@@ -59,10 +59,10 @@ DELETE FROM account;
 
 # ALTER TABLE table MODIFY COLUMN column datatype
 # e.g :
-# alter table account modify column uuid varchar(255) character set utf8 not null default '--'
+# alter table account modify column uuid varchar(255) character set utf8mb4 not null default '--'
 # -> change uuid column data length and set default string
 
 # ALTER TABLE table CHANGE fromecolumn tocolumn datatype
 # e.g :
-# alter table account change uuid uid varchar(255) character set utf8 not null default '--'
+# alter table account change uuid uid varchar(255) character set utf8mb4 not null default '--'
 # -> change uuid column name, data length and set default string

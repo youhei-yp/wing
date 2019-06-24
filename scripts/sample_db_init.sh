@@ -30,28 +30,28 @@ APP_DATABASE_NAME="database_sample"
 
 # execute init script
 mysql -u$LOGIN_USER -p -e "
-CREATE DATABASE IF NOT EXISTS "${APP_DATABASE_NAME}";
+CREATE DATABASE IF NOT EXISTS "${APP_DATABASE_NAME}" CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
 
 USE "${APP_DATABASE_NAME}";
 
 CREATE TABLE IF NOT EXISTS account (
 	id				int				NOT NULL AUTO_INCREMENT,
-	uuid			varchar	(64)	CHARACTER SET utf8 NOT NULL,
-	nickname		varchar	(64)	CHARACTER SET utf8 DEFAULT '',
+	uuid			varchar	(64)	NOT NULL,
+	nickname		varchar	(64)	DEFAULT '',
 	createtime		bigint			NOT NULL,
 	drafts			int				DEFAULT 0,
 	activities		int				DEFAULT 0,
 	offshelves		int				DEFAULT 0,
 	PRIMARY KEY (id),
 	UNIQUE(uuid)
-) DEFAULT CHARSET=utf8 COMMENT='Account table';
+) DEFAULT COMMENT='Account table';
 
 CREATE TABLE IF NOT EXISTS goods (
 	id				int				NOT NULL AUTO_INCREMENT,
 	aid				int				NOT NULL,
 	box				int				DEFAULT 0,
 	PRIMARY KEY (id),
-) DEFAULT CHARSET=utf8 COMMENT='Goods table';
+) DEFAULT COMMENT='Goods table';
 
 describe account;
 describe goods;
