@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2018-2019 Dunyu All Rights Reserved.
+# Copyright (c) 2018-2019 WING All Rights Reserved.
 #
 # Author : yangping
 # Email  : youhei_yp@163.com

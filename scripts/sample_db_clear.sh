@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2018-2019 Dunyu All Rights Reserved.
+# Copyright (c) 2018-2019 WING All Rights Reserved.
 #
 # Author : yangping
 # Email  : youhei_yp@163.com
@@ -24,7 +24,7 @@ LOGIN_USER=$1
 # TODO :                                                  #
 #                                                         #
 # YOU MUST CHANGE database_sample TO YOUR DATABASE NAME   #
-# e.g: APP_DATABASE_NAME="paster"                         #
+# e.g: APP_DATABASE_NAME="xappdb"                         #
 # ------------------------------------------------------- #
 APP_DATABASE_NAME="database_sample"
 

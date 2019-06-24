@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2018-2019 Dunyu All Rights Reserved.
+# Copyright (c) 2018-2019 WING All Rights Reserved.
 #
 # Author : yangping
 # Email  : youhei_yp@163.com
@@ -35,7 +35,7 @@ ROOT=`cd "${bin}/.."; pwd`
 # TODO :                                                  #
 #                                                         #
 # YOU MUST CHANGE XX_SERVER_HOME TO YOUR SERVER HOME NAME #
-# e.g: XX_SERVER_HOME -> PASTER_SERVER_HOME               #
+# e.g: XX_SERVER_HOME -> XAPPDB_SERVER_HOME               #
 # ------------------------------------------------------- #
 # export server home path
 [[ ! -d ${XX_SERVER_HOME} ]] && XX_SERVER_HOME="${ROOT}"
@@ -45,7 +45,7 @@ export XX_SERVER_HOME=${XX_SERVER_HOME}
 # TODO :                                                  #
 #                                                         #
 # YOU MUST CHANGE server_name_sample TO YOUR SERVER NAME  #
-# e.g: DAEMON_SERVER_NAME=paster                          #
+# e.g: DAEMON_SERVER_NAME=xappdb                          #
 # ------------------------------------------------------- #
 DAEMON_SERVER_NAME=server_name_sample
 
