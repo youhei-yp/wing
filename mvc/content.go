@@ -24,8 +24,6 @@ type WingProvider struct {
 	Conn *sql.DB
 }
 
-type QueryScanFuc func(rows *sql.Rows) (interface{}, error)
-
 const (
 	// limitPageItems limit to show lits items in one page
 	limitPageItems = 50
@@ -78,7 +76,7 @@ func (w *WingProvider) Prepare(query string) (*sql.Stmt, error) {
 }
 
 // QueryOne call sql.Query() to query one record
-func (w *WingProvider) QueryOne(query string, scanfunc QueryScanFuc, args ...interface{}) (interface{}, error) {
+func (w *WingProvider) QueryOne(query string, cb func(rows *sql.Rows) (interface{}, error), args ...interface{}) (interface{}, error) {
 	rows, err := w.Conn.Query(query, args...)
 	if err != nil {
 		return nil, err
@@ -89,11 +87,11 @@ func (w *WingProvider) QueryOne(query string, scanfunc QueryScanFuc, args ...int
 		return nil, invar.ErrNotFound
 	}
 	rows.Columns()
-	return scanfunc(rows)
+	return cb(rows)
 }
 
 // QueryArray call sql.Query() to query multi records
-func (w *WingProvider) QueryArray(query string, scanfunc QueryScanFuc, args ...interface{}) ([]interface{}, error) {
+func (w *WingProvider) QueryArray(query string, cb func(rows *sql.Rows) (interface{}, error), args ...interface{}) ([]interface{}, error) {
 	rows, err := w.Conn.Query(query, args...)
 	if err != nil {
 		return nil, err
@@ -103,7 +101,7 @@ func (w *WingProvider) QueryArray(query string, scanfunc QueryScanFuc, args ...i
 	list := []interface{}{}
 	if rows.Next() {
 		rows.Columns()
-		item, err := scanfunc(rows)
+		item, err := cb(rows)
 		if err != nil {
 			return nil, err
 		}
