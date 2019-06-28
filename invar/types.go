@@ -55,14 +55,14 @@ const (
 	// StateUnpaied [0], initialization state when trade just created
 	StateUnpaid Status = iota
 
-	// StatePaid    [1], the trading have completed
+	// StatePaid    [1], the transaction completed
 	StatePaid
 
-	// StateExpired [2], the trading has expired
+	// StateExpired [2], the transaction expired
 	StateExpired
 
-	// StateInvalid [3], the trading becomes invalid
-	StateInvalid
+	// StateFailure [3], the transaction failed
+	StateFailure
 )
 
 // Box box type
@@ -167,4 +167,18 @@ const (
 
 	// LimitDeletable [4], deletable permission
 	LimitDeletable
+)
+
+// King category type
+type Kind int
+
+const (
+	// KindHome    [0], home kind
+	KindHome Kind = iota
+
+	// KindCompany [1], company kind
+	KindCompany
+
+	// KindOthers  [2], others kind
+	KindOthers
 )

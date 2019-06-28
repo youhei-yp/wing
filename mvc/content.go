@@ -140,7 +140,7 @@ func (w *WingProvider) FormatSets(updates interface{}) string {
 			}
 		case int, int8, int16, int32, int64, float32, float64, bool:
 			sets = append(sets, fmt.Sprintf(name+"=%v", value))
-		case invar.Status, invar.Box, invar.Role, invar.Limit, invar.Lang:
+		case invar.Status, invar.Box, invar.Role, invar.Limit, invar.Lang, invar.Kind:
 			sets = append(sets, fmt.Sprintf(name+"=%v", value))
 		}
 	}
