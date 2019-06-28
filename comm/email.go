@@ -43,7 +43,7 @@ import (
  * [CODE]
  */
 
-// MailAgent mail agent informations.
+// MailAgent mail agent informations
 type MailAgent struct {
 	Acc  string `json:"acc"`  // username - mail address
 	Pwd  string `json:"pwd"`  // account password
