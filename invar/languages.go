@@ -208,7 +208,16 @@ func init() {
 
 // GetLanguage get language information by code
 func GetLanguage(code Lang) *Language {
-	return languagesCache[code]
+	language := languagesCache[code]
+	if language != nil {
+		return &Language{
+			Code:   language.Code,
+			Key:    language.Key,
+			EnName: language.EnName,
+			CnName: language.CnName,
+		}
+	}
+	return &Language{Code: InvalidLangCode}
 }
 
 // GetLangCode get language code by key
