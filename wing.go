@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 Dunyu All Rights Reserved.
+// Copyright (c) 2018-2019 WING All Rights Reserved.
 //
 // Author : yangping
 // Email  : youhei_yp@163.com
@@ -9,3 +9,15 @@
 // -------------------------------------------------------------------
 
 package wing
+
+// package main
+
+// import (
+// 	_ "github.com/youhei-yp/wing/comm"
+// 	_ "github.com/youhei-yp/wing/invar"
+// 	_ "github.com/youhei-yp/wing/logger"
+// 	_ "github.com/youhei-yp/wing/mvc"
+// 	_ "github.com/youhei-yp/wing/secure"
+// )
+
+// func main() {}

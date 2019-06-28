@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 Dunyu All Rights Reserved.
+// Copyright (c) 2018-2019 WING All Rights Reserved.
 //
 // Author : yangping
 // Email  : youhei_yp@163.com
@@ -95,7 +95,7 @@ func GenOAuthCode(length int, randomType string) (string, error) {
 	str := buf.String()
 	len := len(str)
 	if len == 0 {
-		return "", invar.ErrUnkownCharType.Err
+		return "", invar.ErrUnkownCharType
 	}
 
 	// random OAuth code

@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 Dunyu All Rights Reserved.
+// Copyright (c) 2018-2019 WING All Rights Reserved.
 //
 // Author : yangping
 // Email  : youhei_yp@163.com
@@ -73,7 +73,7 @@ func ViaLoginToken(acc, pwd, token string, duration int64) (bool, error) {
 		if time.Now().UnixNano()-latest <= duration {
 			return true, nil
 		}
-		return false, invar.ErrTokenExpired.Err
+		return false, invar.ErrTokenExpired
 	}
 	return false, nil
 }

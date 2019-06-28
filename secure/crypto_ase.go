@@ -1,3 +1,12 @@
+// Copyright (c) 2018-2019 WING All Rights Reserved.
+//
+// Author : yangping
+// Email  : youhei_yp@163.com
+//
+// Prismy.No | Date       | Modified by. | Description
+// -------------------------------------------------------------------
+// 00001       2019/05/22   yangping       New version
+// -------------------------------------------------------------------
 package secure
 
 import (
@@ -34,102 +43,101 @@ import (
  *   logger.I("encrypted string: ", encrypted)
  *
  *   [CODE]
- */
-
-/*
- * Note :
- * 			By the way, you can use the AES encrypt and decrypt on other language,
- *		here is the code
  *
- *   [CODE: AES for java(Android)]
+ * ---------------------------------------------------------------------------------
  *
- *		public String encryptWithAES(String key, String message) {
- *		    try {
- *		        // Use md5 value as the real key
- *		        byte[] b = key.getBytes();
- *		        MessageDigest md = MessageDigest.getInstance("MD5");
- *		        byte[] keyData = md.digest(b);
+ * By the way, you can use the AES encrypt or decrypt for other languages as follows:
  *
- *		        SecretKeySpec skey = new SecretKeySpec(keyData), "AES");
- *		        // Create an 8-byte initialization vector
- *		        byte[] iv = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d,
- *		                0x0e, 0x0f };
- *		        AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
+ *   [CODE: ]
  *
- *		        Cipher ecipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
- *		        // CBC requires an initialization vector
- *		        ecipher.init(Cipher.ENCRYPT_MODE, skey, paramSpec);
+ *   /// AES for java (Android)
  *
- *		        byte[] plaintext = message.getBytes();
- *		        byte[] result = ecipher.doFinal(plaintext, 0, plaintext.length);
+ *   public String encryptByAES(String secretkey, String original) {
+ *       try {
+ *           // use md5 value as the real key
+ *           byte[] b = secretkey.getBytes();
+ *           MessageDigest md = MessageDigest.getInstance("MD5");
+ *           byte[] hashed = md.digest(b);
  *
- *		        return Base64.encodeToString(result, Base64.DEFAULT);
- *		    } catch (Exception e) {
- *		        e.printStackTrace();
- *		    }
- *		    return null;
- *		}
+ *           // create an 16-byte initialization vector
+ *           byte[] iv = new byte[] {
+ *               0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f
+ *           };
+ *           AlgorithmParameterSpec spec = new IvParameterSpec(iv);
+ *           SecretKeySpec keyspec = new SecretKeySpec(hashed), "AES");
  *
- *		public String decryptWithAES(String key, String message) {
- *		    try {
- *		        // Use md5 value as the real key
- *		        byte[] b = key.getBytes();
- *		        MessageDigest md = MessageDigest.getInstance("MD5");
- *		        byte[] keyData = md.digest(b);
+ *           // create cipher and initialize CBC vector
+ *           Cipher ecipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+ *           ecipher.init(Cipher.ENCRYPT_MODE, keyspec, spec);
  *
- *		        SecretKeySpec skey = new SecretKeySpec(keyData), "AES");
- *		        // Create an 8-byte initialization vector
- *		        byte[] iv = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d,
- *		                0x0e, 0x0f };
- *		        AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
+ *           byte[] plaintext = original.getBytes();
+ *           byte[] ciphertext = ecipher.doFinal(plaintext, 0, plaintext.length);
  *
- *		        Cipher dcipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
- *		        // CBC requires an initialization vector
- *		        dcipher.init(Cipher.DECRYPT_MODE, skey, paramSpec);
+ *           return Base64.encodeToString(ciphertext, Base64.DEFAULT);
+ *       } catch (Exception e) {
+ *           e.printStackTrace();
+ *       }
+ *       return null;
+ *   }
  *
- *		        byte[] messageData = Base64.decode(message, Base64.DEFAULT);
- *		        byte[] result = dcipher.doFinal(messageData, 0, messageData.length);
+ *   public String decryptByAES(String secretkey, String ciphertextb64) {
+ *       try {
+ *           // use md5 value as the real key
+ *           byte[] b = secretkey.getBytes();
+ *           MessageDigest md = MessageDigest.getInstance("MD5");
+ *           byte[] hashed = md.digest(b);
  *
- *		        return new String(result);
- *		    } catch (Exception e) {
- *		        e.printStackTrace();
- *		    }
- *		    return null;
- *		}
+ *           // create an 16-byte initialization vector
+ *           byte[] iv = new byte[] {
+ *               0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f
+ *           };
+ *           AlgorithmParameterSpec spec = new IvParameterSpec(iv);
+ *           SecretKeySpec keyspec = new SecretKeySpec(hashed), "AES");
  *
- *   [CODE]
+ *           // create cipher and initialize CBC vector
+ *           Cipher dcipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+ *           dcipher.init(Cipher.DECRYPT_MODE, keyspec, spec);
  *
- *   [CODE: AES for node.js]
+ *           byte[] ciphertext = Base64.decode(ciphertextb64, Base64.DEFAULT);
+ *           byte[] original = dcipher.doFinal(ciphertext, 0, ciphertext.length);
  *
- *			let iv = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d,
- *			    0x0e, 0x0f];
+ *           return new String(original);
+ *       } catch (Exception e) {
+ *           e.printStackTrace();
+ *       }
+ *       return null;
+ *   }
  *
- *			function encrypt_with_aes(key, message) {
- *			    let md5 = crypto.createHash('md5').update(key).digest('hex');
- *			    const cipher = crypto.createCipheriv(
- *			        'aes-128-cbc',
- *			        new Buffer(md5, 'hex'),
- *			        new Buffer(iv)
- *			    );
- *			    // cipher.setAutoPadding(true);
- *			    var encrypted = cipher.update(message, 'utf8', 'base64');
- *			    encrypted += cipher.final('base64');
- *			    console.log('encode message: ' + encrypted);
- *			    return encrypted;
- *			}
+ *   /// AES for node.js
  *
- *			function decrypt_with_aes(key, message) {
- *			    let md5 = crypto.createHash('md5').update(key).digest('hex');
- *			    const decipher = crypto.createDecipheriv(
- *			        'aes-128-cbc',
- *			        new Buffer(md5, 'hex'),
- *			        new Buffer(iv)
- *			    );
- *			    var decrypted = decipher.update(message, 'base64', 'utf8');
- *			    decrypted += decipher.final('utf8');
- *			    console.log('decode message: ' + decrypted);
- *			    return decrypted;
- *			}
+ *   let iv = [ 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f ];
+ *
+ *   function encrypt_by_aes(secretkey, original) {
+ *       let md5 = crypto.createHash('md5').update(secretkey).digest('hex');
+ *       const ecipher = crypto.createCipheriv(
+ *           'aes-128-cbc',
+ *           new Buffer(md5, 'hex'),
+ *           new Buffer(iv)
+ *       );
+ *       // ecipher.setAutoPadding(true);
+ *       var ciphertextb64 = ecipher.update(original, 'utf8', 'base64');
+ *       ciphertextb64 += ecipher.final('base64');
+ *       console.log('ciphertextb64: ' + ciphertextb64);
+ *       return ciphertextb64;
+ *   }
+ *
+ *   function decrypt_by_aes(secretkey, ciphertextb64) {
+ *       let md5 = crypto.createHash('md5').update(secretkey).digest('hex');
+ *       const dcipher = crypto.createDecipheriv(
+ *           'aes-128-cbc',
+ *           new Buffer(md5, 'hex'),
+ *           new Buffer(iv)
+ *       );
+ *       var original = dcipher.update(ciphertextb64, 'base64', 'utf8');
+ *       original += dcipher.final('utf8');
+ *       console.log('original: ' + original);
+ *       return original;
+ *   }
  *
  *   [CODE]
  *
@@ -161,7 +169,7 @@ func GenAESKey() string {
 // AESEncrypt using secret key to encrypt original data
 func AESEncrypt(secretkey, original []byte) (string, error) {
 	if len(secretkey) != aesKeyLength {
-		return "", invar.ErrKeyLenSixteen.Err
+		return "", invar.ErrKeyLenSixteen
 	}
 
 	hashed := HashMD5(secretkey)
@@ -171,7 +179,7 @@ func AESEncrypt(secretkey, original []byte) (string, error) {
 	}
 
 	enc := cipher.NewCBCEncrypter(block, aesInitVector)
-	content := PKCS5Padding(original, block.BlockSize())
+	content := pkcs5Padding(original, block.BlockSize())
 	crypted := make([]byte, len(content))
 	enc.CryptBlocks(crypted, content)
 	return EncodeBase64(string(crypted)), nil
@@ -180,7 +188,7 @@ func AESEncrypt(secretkey, original []byte) (string, error) {
 // AESDecrypt using secret key to decrypt ciphertext
 func AESDecrypt(secretkey []byte, ciphertextb64 string) (string, error) {
 	if len(secretkey) != aesKeyLength {
-		return "", invar.ErrKeyLenSixteen.Err
+		return "", invar.ErrKeyLenSixteen
 	}
 
 	hashed := HashMD5(secretkey)
@@ -197,18 +205,18 @@ func AESDecrypt(secretkey []byte, ciphertextb64 string) (string, error) {
 	dec := cipher.NewCBCDecrypter(block, aesInitVector)
 	decrypted := make([]byte, len(ciphertext))
 	dec.CryptBlocks(decrypted, []byte(ciphertext))
-	return string(PKCS5Unpadding(decrypted)), nil
+	return string(pkcs5Unpadding(decrypted)), nil
 }
 
-// PKCS5Padding use to padding the space of data
-func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
+// pkcs5Padding use to padding the space of data
+func pkcs5Padding(ciphertext []byte, blockSize int) []byte {
 	padding := blockSize - len(ciphertext)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 	return append(ciphertext, padtext...)
 }
 
-// PKCS5Unpadding use to unpadding the space of data
-func PKCS5Unpadding(encrypt []byte) []byte {
+// pkcs5Unpadding use to unpadding the space of data
+func pkcs5Unpadding(encrypt []byte) []byte {
 	padding := encrypt[len(encrypt)-1]
 	return encrypt[:len(encrypt)-int(padding)]
 }

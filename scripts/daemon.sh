@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2018-2019 Dunyu All Rights Reserved.
+# Copyright (c) 2018-2019 WING All Rights Reserved.
 #
 # Author : yangping
 # Email  : youhei_yp@163.com
 #
 # Prismy.No | Date       | Modified by. | Description
 # -------------------------------------------------------------------
-# 00001       2018/12/01   youhei         New version
+# 00001       2019/05/22   yangping       New version
 # -------------------------------------------------------------------
 
 show_usage() {
@@ -34,20 +34,20 @@ ROOT=`cd "${bin}/.."; pwd`
 # ------------------------------------------------------- #
 # TODO :                                                  #
 #                                                         #
-# YOU MUST CHANGE XX_SERVER_HOME TO YOUR SERVER HOME NAME #
-# e.g: XX_SERVER_HOME -> PASTER_SERVER_HOME               #
+# YOU MUST CHANGE SERVICE_HOME TO YOUR SERVER HOME NAME   #
+# e.g: SERVICE_HOME -> XAPPDB_SERVER_HOME                 #
 # ------------------------------------------------------- #
 # export server home path
-[[ ! -d ${XX_SERVER_HOME} ]] && XX_SERVER_HOME="${ROOT}"
-export XX_SERVER_HOME=${XX_SERVER_HOME}
+[[ ! -d ${SERVICE_HOME} ]] && SERVICE_HOME="${ROOT}"
+export SERVICE_HOME=${SERVICE_HOME}
 
 # ------------------------------------------------------- #
 # TODO :                                                  #
 #                                                         #
 # YOU MUST CHANGE server_name_sample TO YOUR SERVER NAME  #
-# e.g: DAEMON_SERVER_NAME=paster                          #
+# e.g: SERVICE_NAME=xapp                                  #
 # ------------------------------------------------------- #
-DAEMON_SERVER_NAME=server_name_sample
+SERVICE_NAME=server_name_sample
 
 # get start|stop|status arguments
 commands=$1
@@ -70,9 +70,9 @@ if [ ! -z ${forced} ]; then
 fi
 
 # create log directory and process file
-LogDir="${XX_SERVER_HOME}/logs"
+LogDir="${SERVICE_HOME}/logs"
 mkdir -p "$LogDir"
-pid=${LogDir}/${DAEMON_SERVER_NAME}.pid
+pid=${LogDir}/${SERVICE_NAME}.pid
 
 # dispath start|stop|status commands
 case $commands in
@@ -85,8 +85,8 @@ case $commands in
       fi
     fi
 
-    cd ${XX_SERVER_HOME}
-    ./${DAEMON_SERVER_NAME} >&1 </dev/null &
+    cd ${SERVICE_HOME}
+    ./${SERVICE_NAME} >&1 </dev/null &
     echo $! > ${pid}
     ;;
 
