@@ -24,6 +24,8 @@ type WingProvider struct {
 	Conn *sql.DB
 }
 
+type QueryScanFuc func(rows *sql.Rows) (interface{}, error)
+
 const (
 	// limitPageItems limit to show lits items in one page
 	limitPageItems = 50
@@ -73,6 +75,71 @@ func (w *WingProvider) Query(query string, args ...interface{}) (*sql.Rows, erro
 // Prepare call sql.Prepare()
 func (w *WingProvider) Prepare(query string) (*sql.Stmt, error) {
 	return w.Conn.Prepare(query)
+}
+
+// QueryOne call sql.Query() to query one record
+func (w *WingProvider) QueryOne(query string, scanfunc QueryScanFuc, args ...interface{}) (interface{}, error) {
+	rows, err := w.Conn.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, invar.ErrNotFound
+	}
+	rows.Columns()
+	return scanfunc(rows)
+}
+
+// QueryArray call sql.Query() to query multi records
+func (w *WingProvider) QueryArray(query string, scanfunc QueryScanFuc, args ...interface{}) ([]interface{}, error) {
+	rows, err := w.Conn.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []interface{}{}
+	if rows.Next() {
+		rows.Columns()
+		item, err := scanfunc(rows)
+		if err != nil {
+			return nil, err
+		}
+		list = append(list, item)
+	}
+	return list, nil
+}
+
+// Insert call sql.Prepare() and stmt.Exec() to insert a new record
+func (w *WingProvider) Insert(query string, args ...interface{}) (int64, error) {
+	stmt, err := w.Conn.Prepare(query)
+	if err != nil {
+		return -1, err
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(args...)
+	if err != nil {
+		return -1, err
+	}
+	return result.LastInsertId()
+}
+
+// Execute call sql.Prepare() and stmt.Exec() to update or delete records
+func (w *WingProvider) Execute(query string, args ...interface{}) error {
+	stmt, err := w.Conn.Prepare(query)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(args...)
+	if err != nil {
+		return err
+	}
+	return w.Affected(result)
 }
 
 // AppendLike append like keyword end of sql string,
