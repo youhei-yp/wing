@@ -6,9 +6,24 @@
 // Prismy.No | Date       | Modified by. | Description
 // -------------------------------------------------------------------
 // 00001       2019/05/22   yangping       New version
+// 00002       2019/06/30   zhaixing       Add function from godfs
 // -------------------------------------------------------------------
 
 package invar
+
+// Bool boolean type
+type Bool int
+
+const (
+	// BFalse mean false or FALSE
+	BFalse Bool = iota - 1
+
+	// BNone means default status, not inited
+	BNone
+
+	// BTrue means true or TRUE
+	BTrue
+)
 
 // Status status type
 type Status int
@@ -181,4 +196,22 @@ const (
 
 	// KindOthers  [2], others kind
 	KindOthers
+)
+
+// Frame's status type
+const (
+	// StatusSuccess                                [0],status success
+	StatusSuccess byte = iota
+
+	// StatusInternalErr                    [1],status internal error
+	StatusInternalErr
+
+	// StatusBadSecret                              [2],status bad secret
+	StatusBadSecret
+
+	// StatusFullConnectionPool             [3],status full connection pool
+	StatusFullConnectionPool
+
+	// StatusFullConnectionPool             [4],status instance id exist
+	StatusInstanceIdExist
 )
