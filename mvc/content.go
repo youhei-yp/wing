@@ -24,7 +24,8 @@ type WingProvider struct {
 	Conn *sql.DB
 }
 
-type QueryScanFuc func(rows *sql.Rows) (interface{}, error)
+// ScanCallback use for scan query result from rows
+type ScanCallback func(rows *sql.Rows) error
 
 const (
 	// limitPageItems limit to show lits items in one page
@@ -78,38 +79,35 @@ func (w *WingProvider) Prepare(query string) (*sql.Stmt, error) {
 }
 
 // QueryOne call sql.Query() to query one record
-func (w *WingProvider) QueryOne(query string, scanfunc QueryScanFuc, args ...interface{}) (interface{}, error) {
+func (w *WingProvider) QueryOne(query string, cb ScanCallback, args ...interface{}) error {
 	rows, err := w.Conn.Query(query, args...)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer rows.Close()
 
 	if !rows.Next() {
-		return nil, invar.ErrNotFound
+		return invar.ErrNotFound
 	}
 	rows.Columns()
-	return scanfunc(rows)
+	return cb(rows)
 }
 
 // QueryArray call sql.Query() to query multi records
-func (w *WingProvider) QueryArray(query string, scanfunc QueryScanFuc, args ...interface{}) ([]interface{}, error) {
+func (w *WingProvider) QueryArray(query string, cb ScanCallback, args ...interface{}) error {
 	rows, err := w.Conn.Query(query, args...)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer rows.Close()
 
-	list := []interface{}{}
-	if rows.Next() {
+	for rows.Next() {
 		rows.Columns()
-		item, err := scanfunc(rows)
-		if err != nil {
-			return nil, err
+		if err := cb(rows); err != nil {
+			return err
 		}
-		list = append(list, item)
 	}
-	return list, nil
+	return nil
 }
 
 // Insert call sql.Prepare() and stmt.Exec() to insert a new record
@@ -200,15 +198,18 @@ func (w *WingProvider) FormatSets(updates interface{}) string {
 
 		value := values.Field(i).Interface()
 		switch value.(type) {
+		case bool:
+			sets = append(sets, fmt.Sprintf(name+"=%v", value))
 		case string:
 			trimvalue := strings.Trim(value.(string), " ")
-			if trimvalue != "" {
+			if trimvalue != "" { // filter empty string fields
 				sets = append(sets, fmt.Sprintf(name+"='%s'", trimvalue))
 			}
-		case int, int8, int16, int32, int64, float32, float64, bool:
-			sets = append(sets, fmt.Sprintf(name+"=%v", value))
-		case invar.Status, invar.Box, invar.Role, invar.Limit, invar.Lang, invar.Kind:
-			sets = append(sets, fmt.Sprintf(name+"=%v", value))
+		case int, int8, int16, int32, int64, float32, float64,
+			invar.Status, invar.Box, invar.Role, invar.Limit, invar.Lang, invar.Kind, invar.Bool:
+			if fmt.Sprintf("%v", value) != "0" { // filter 0 fields
+				sets = append(sets, fmt.Sprintf(name+"=%v", value))
+			}
 		}
 	}
 	return strings.Join(sets, ", ")
