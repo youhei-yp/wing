@@ -11,6 +11,20 @@
 
 package invar
 
+// Bool boolean type
+type Bool int
+
+const (
+	// BFalse mean false or FALSE
+	BFalse Bool = iota - 1
+
+	// BNone means default status, not inited
+	BNone
+
+	// BTrue means true or TRUE
+	BTrue
+)
+
 // Status status type
 type Status int
 
