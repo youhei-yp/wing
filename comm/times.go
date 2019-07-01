@@ -12,7 +12,7 @@
 package comm
 
 import (
-	"bytes"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -66,36 +66,27 @@ func TodayUnix() int64 {
 	return st.Unix()
 }
 
-// fill3Digits add zero for number > 10
-func fill2Digits(input int) string {
-	if input < 10 {
-		return "0" + strconv.Itoa(input)
-	}
-	return strconv.Itoa(input)
+// Fill2Digits add zero for number > 10
+func Fill2Digits(input int) string {
+	return fmt.Sprintf("%02d", input)
 }
 
-// fill3Digits add zero for number > 10 or 100
-func fill3Digits(input int) string {
-	if input < 10 {
-		return "00" + strconv.Itoa(input)
-	}
-	if input < 100 {
-		return "0" + strconv.Itoa(input)
-	}
-	return strconv.Itoa(input)
+// Fill3Digits add zero for number > 10 or 100
+func Fill3Digits(input int) string {
+	return fmt.Sprintf("%03d", input)
 }
 
 // GetHumanReadableDuration return readable time during start to end: 12:12:12
-func GetHumanReadableDuration(start time.Time, end time.Time) string {
+func Unix2timeDuration(start time.Time, end time.Time) string {
 	v := end.Unix() - start.Unix() // seconds
 	h := v / 3600
 	m := v % 3600 / 60
 	s := v % 60
-	return fill2Digits(int(h)) + ":" + fill2Digits(int(m)) + ":" + fill2Digits(int(s))
+	return Fill2Digits(int(h)) + ":" + Fill2Digits(int(m)) + ":" + Fill2Digits(int(s))
 }
 
 // GetLongHumanReadableDuration return readable time during start to end: 2d 6h 25m 48s
-func GetLongHumanReadableDuration(start time.Time, end time.Time) string {
+func Unix2DaysDuration(start time.Time, end time.Time) string {
 	v := int(end.Unix() - start.Unix()) // seconds
 	return strconv.Itoa(v/86400) + "d " + strconv.Itoa(v%86400/3600) + "h " + strconv.Itoa(v%3600/60) + "m " + strconv.Itoa(v%60) + "s"
 }
