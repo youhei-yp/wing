@@ -10,7 +10,7 @@
 
 package wing
 
-//package main
+// package main
 
 // import (
 // 	_ "github.com/youhei-yp/wing/comm"

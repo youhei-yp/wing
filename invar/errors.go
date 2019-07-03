@@ -102,83 +102,86 @@ var (
 	// ErrOverTimes over retry times
 	ErrOverTimes = errors.New("Over retry times")
 
-	// ErrSetFrameNil cannot set frame meta to nil
-	ErrSetFrameNil = errors.New("cannot set frame meta to nil")
+	// ErrSetFrameNil failed clear frame meta
+	ErrSetFrameNil = errors.New("Failed clear frame meta")
 
 	// ErrOperationNotSupport operation not support
-	ErrOperationNotSupport = errors.New("operation not support")
+	ErrOperationNotSupport = errors.New("Operation not support")
 
-	// ErrSendHeadBytes
-	ErrSendHeadBytes = errors.New("error send head bytes")
+	// ErrSendHeadBytes failed send head bytes
+	ErrSendHeadBytes = errors.New("Failed send head bytes")
 
-	// ErrSendBodyBytes
-	ErrSendBodyBytes = errors.New("error send body bytes")
+	// ErrSendBodyBytes failed send body bytes
+	ErrSendBodyBytes = errors.New("Failed send body bytes")
 
-	// ErrRead error read bytes
-	ErrRead = errors.New("error read bytes")
+	// ErrReadBytes error read bytes
+	ErrReadBytes = errors.New("Error read bytes")
 
 	// ErrFileNotFound file not found
-	ErrFileNotFound = errors.New("file not found")
+	ErrFileNotFound = errors.New("File not found")
 
 	// ErrInternalServer internal server error
-	ErrInternalServer = errors.New("internal server error")
+	ErrInternalServer = errors.New("Internal server error")
 
-	// ErrDownloadFile error download file
-	ErrDownloadFile = errors.New("error download file")
+	// ErrDownloadFile failed download file
+	ErrDownloadFile = errors.New("Failed download file")
 
-	// ErrCreateByte cannot create bytes: system protection
-	ErrCreateByte = errors.New("cannot create bytes: system protection")
+	// ErrCreateByte failed create bytes: system protection
+	ErrCreateByte = errors.New("Failed create bytes: system protection")
 
-	// ErrAlrdyVon already connected
-	ErrAlrdyVon = errors.New("already connected")
+	// ErrAlreadyConn already connected
+	ErrAlreadyConn = errors.New("Already connected")
 
-	// ErrOpenSourceFile open source file failed
-	ErrOpenSourceFile = errors.New("open source file failed")
+	// ErrOpenSourceFile failed open source file
+	ErrOpenSourceFile = errors.New("Failed open source file")
 
-	// ErrEmptyRepons receive empty response from server
-	ErrEmptyRepons = errors.New("receive empty response from server")
+	// ErrEmptyReponse received empty response
+	ErrEmptyReponse = errors.New("Received empty response")
 
-	// ErrReadConf error read from configuration file
-	ErrReadConf = errors.New("error read from configuration file")
+	// ErrReadConf failed load config file
+	ErrReadConf = errors.New("Failed load config file")
 
-	// ErrDirectoryPath expect file path not directory path
-	ErrDirectoryPath = errors.New("expect file path not directory path")
+	// ErrUnexpectedDir expect file path not directory
+	ErrUnexpectedDir = errors.New("Expect file path not directory")
 
-	// ErrWriteMd5 error write md
-	ErrWriteMd5 = errors.New("error write md")
+	// ErrWriteMD5 failed write to md5
+	ErrWriteMD5 = errors.New("Failed write to md5")
 
-	// ErrWriteOut error write out
-	ErrWriteOut = errors.New("error write out")
+	// ErrWriteOut failed write out
+	ErrWriteOut = errors.New("Failed write out")
 
-	// ErrHandleDownload error handle download file
-	ErrHandleDownload = errors.New("error handle download file")
+	// ErrHandleDownload failed handle download file
+	ErrHandleDownload = errors.New("Failed handle download file")
 
-	// ErrFullConnectionPool connection pool is full
-	ErrFullConnectionPool = errors.New("connection pool is full")
+	// ErrFullConnPool connection pool is full
+	ErrFullConnPool = errors.New("Connection pool is full")
 
 	// ErrPoolSize thread pool size value must be positive
-	ErrPoolSize = errors.New("thread pool size value must be positive")
+	ErrPoolSize = errors.New("Thread pool size value must be positive")
 
 	// ErrPoolFull pool is full, can not take any more
-	ErrPoolFull = errors.New("pool is full, can not take any more")
+	ErrPoolFull = errors.New("Pool is full, can not take any more")
 
-	// ErrCheckDb error check db: failed retry many times
-	ErrCheckDb = errors.New("error check db: failed retry many times")
+	// ErrCheckDB check database: failed retry many times
+	ErrCheckDB = errors.New("Check database: failed retry many times")
 
-	// ErrFetchDb cannot fetch db connection from pool: wait time out
-	ErrFetchDb = errors.New("cannot fetch db connection from pool: wait time out")
+	// ErrFetchDB fetch database connection time out from pool
+	ErrFetchDB = errors.New("Fetch database connection time out from pool")
 
-	// ErrReadFileBody read file body failed
-	ErrReadFileBody = errors.New("read file body failed")
+	// ErrReadFileBody failed read file content
+	ErrReadFileBody = errors.New("Failed read file content")
 
 	// ErrNilFrame frame is null
-	ErrNilFrame = errors.New("frame is null")
+	ErrNilFrame = errors.New("Frame is null")
 
 	// ErrNoStorage no storage server available
-	ErrNoStorage = errors.New("no storage server available")
+	ErrNoStorage = errors.New("No storage server available")
 
-	// ErrDownloadWrongLen download return wrong file length
-	ErrDownloadWrongLen = errors.New("download return wrong file length")
+	// ErrUnmatchLen unmatch download file length
+	ErrUnmatchLen = errors.New("Unmatch download file length")
+
+	// ErrCopyFile failed copy file
+	ErrCopyFile = errors.New("Failed copy file")
 )
 
 var (
@@ -263,20 +266,20 @@ var (
 	// WErrOverTimes 0x101A over try times
 	WErrOverTimes = &WingErr{0x101A, ErrOverTimes}
 
-	// WErrSetFrameNil 0x101B cannot set frame meta to nil
+	// WErrSetFrameNil 0x101B failed clear frame meta
 	WErrSetFrameNil = &WingErr{0x101B, ErrSetFrameNil}
 
 	// WErrOperationNotSupport 0x101C operation not support
 	WErrOperationNotSupport = &WingErr{0x101C, ErrOperationNotSupport}
 
-	// WErrSendHeadBytes 0x101D error send head bytes
+	// WErrSendHeadBytes 0x101D failed send head bytes
 	WErrSendHeadBytes = &WingErr{0x101D, ErrSendHeadBytes}
 
-	// WErrSendBodyBytes 0x101E error send body bytes
+	// WErrSendBodyBytes 0x101E failed send body bytes
 	WErrSendBodyBytes = &WingErr{0x101E, ErrSendBodyBytes}
 
-	// WErrRead 0x101F error read bytes
-	WErrRead = &WingErr{0x101F, ErrRead}
+	// WErrReadBytes 0x101F error read bytes
+	WErrReadBytes = &WingErr{0x101F, ErrReadBytes}
 
 	// WErrFileNotFound 0x1020 file not found
 	WErrFileNotFound = &WingErr{0x1020, ErrFileNotFound}
@@ -284,38 +287,38 @@ var (
 	// WErrInternalServer 0x1021 internal server error
 	WErrInternalServer = &WingErr{0x1021, ErrInternalServer}
 
-	// WErrDownloadFile 0x1022 error download file
+	// WErrDownloadFile 0x1022 failed download file
 	WErrDownloadFile = &WingErr{0x1022, ErrDownloadFile}
 
-	// WErrCreateByte 0x1023 cannot create bytes: system protection
+	// WErrCreateByte 0x1023 failed create bytes: system protection
 	WErrCreateByte = &WingErr{0x1023, ErrCreateByte}
 
 	// WErrAlrdyVon 0x1024 already connected
-	WErrAlrdyVon = &WingErr{0x1024, ErrAlrdyVon}
+	WErrAlreadyConn = &WingErr{0x1024, ErrAlreadyConn}
 
-	// WErrOpenSourceFile 0x1025 open source file failed
+	// WErrOpenSourceFile 0x1025 failed open source file
 	WErrOpenSourceFile = &WingErr{0x1025, ErrOpenSourceFile}
 
-	// WErrEmptyRepons 0x1026 receive empty response from server
-	WErrEmptyRepons = &WingErr{0x1026, ErrEmptyRepons}
+	// WErrEmptyRepons 0x1026 received empty response
+	WErrEmptyReponse = &WingErr{0x1026, ErrEmptyReponse}
 
-	// WErrReadConf 0x1027 error read from configuration file
+	// WErrReadConf 0x1027 failed load config file
 	WErrReadConf = &WingErr{0x1027, ErrReadConf}
 
-	// WErrDirectoryPath 0x1028 expect file path not directory path
-	WErrDirectoryPath = &WingErr{0x1028, ErrDirectoryPath}
+	// WErrDirectoryPath 0x1028 expect file path not directory
+	WErrUnexpectedDir = &WingErr{0x1028, ErrUnexpectedDir}
 
-	// WErrWriteMd5 0x1029 error write md
-	WErrWriteMd5 = &WingErr{0x1029, ErrWriteMd5}
+	// WErrWriteMD5 0x1029 failed write to md5
+	WErrWriteMD5 = &WingErr{0x1029, ErrWriteMD5}
 
-	// WErrWriteOut 0x102A error write out
+	// WErrWriteOut 0x102A failed write out
 	WErrWriteOut = &WingErr{0x102A, ErrWriteOut}
 
-	// WErrHandleDownload 0x102B error handle download file
+	// WErrHandleDownload 0x102B failed handle download file
 	WErrHandleDownload = &WingErr{0x102B, ErrHandleDownload}
 
-	// WErrFullConnectionPool 0x102C connection pool is full
-	WErrFullConnectionPool = &WingErr{0x102C, ErrFullConnectionPool}
+	// ErrFullConnPool 0x102C connection pool is full
+	WErrFullConnPool = &WingErr{0x102C, ErrFullConnPool}
 
 	// WErrPoolSize 0x102D thread pool size value must be positive
 	WErrPoolSize = &WingErr{0x102D, ErrPoolSize}
@@ -323,13 +326,13 @@ var (
 	// WErrPoolFull 0x102E pool is full, can not take any more
 	WErrPoolFull = &WingErr{0x102E, ErrPoolFull}
 
-	// WErrCheckDb 0x102F error check db: failed retry many times
-	WErrCheckDb = &WingErr{0x102F, ErrCheckDb}
+	// WErrCheckDB 0x102F check database: failed retry many times
+	WErrCheckDB = &WingErr{0x102F, ErrCheckDB}
 
-	// WErrFetchDb 0x1030 cannot fetch db connection from pool: wait time out
-	WErrFetchDb = &WingErr{0x1030, ErrFetchDb}
+	// WErrFetchDB 0x1030 fetch database connection time out from pool
+	WErrFetchDB = &WingErr{0x1030, ErrFetchDB}
 
-	// WErrReadFileBody 0x1031 read file body failed
+	// WErrReadFileBody 0x1031 failed read file content
 	WErrReadFileBody = &WingErr{0x1031, ErrReadFileBody}
 
 	// WErrNilFrame 0x1032 frame is null
@@ -338,6 +341,9 @@ var (
 	// WErrNoStorage 0x1033 no storage server available
 	WErrNoStorage = &WingErr{0x1033, ErrNoStorage}
 
-	// WErrDownloadWrongLen 0x1034 download return wrong file length
-	WErrDownloadWrongLen = &WingErr{0x1034, ErrDownloadWrongLen}
+	// WErrUnmatchLen 0x1034 unmatch download file length
+	WErrUnmatchLen = &WingErr{0x1034, ErrUnmatchLen}
+
+	// WErrCopyFile failed copy file
+	WErrCopyFile = &WingErr{0x1035, ErrCopyFile}
 )

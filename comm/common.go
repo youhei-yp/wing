@@ -12,37 +12,46 @@
 package comm
 
 import (
-	"crypto/md5"
-	"encoding/hex"
-	"io"
+	"errors"
+	"fmt"
+	"github.com/youhei-yp/wing/logger"
+	"strconv"
 )
 
-func Try(f func(), catcher func(interface{})) {
+// Try try-catch-finaly method
+func Try(do func(), catcher func(error), finaly ...func()) {
 	defer func() {
-		if err := recover(); err != nil {
-			catcher(err)
+		if i := recover(); i != nil {
+			execption := errors.New(fmt.Sprint(i))
+			logger.E("catched exception:", i)
+			catcher(execption)
+			if len(finaly) > 0 {
+				finaly[0]()
+			}
 		}
 	}()
-	f()
+	do()
 }
 
-// TValue ternary operation
-func TValue(condition bool, trueValue interface{}, falseValue interface{}) interface{} {
+// Ternary ternary operation
+func Ternary(condition bool, trueResult interface{}, falseResult interface{}) interface{} {
 	if condition {
-		return trueValue
+		return trueResult
 	}
-	return falseValue
+	return falseResult
 }
 
-// Md5sum merge Md5 string to one Md5 string.
-func Md5sum(input ...string) string {
-	h := md5.New()
-	if input != nil {
-		for _, v := range input {
-			io.WriteString(h, v)
-		}
-	}
-	sliceCipherStr := h.Sum(nil)
-	sMd5 := hex.EncodeToString(sliceCipherStr)
-	return sMd5
+// To2Digits fill zero if input digit not enough 2
+func To2Digits(input interface{}) string {
+	return fmt.Sprintf("%02d", input)
+}
+
+// To2Digits fill zero if input digit not enough 3
+func To3Digits(input interface{}) string {
+	return fmt.Sprintf("%03d", input)
+}
+
+// ToNDigits fill zero if input digit not enough N
+func ToNDigits(input interface{}, n int) string {
+	return fmt.Sprintf("%0"+strconv.Itoa(n)+"d", input)
 }
