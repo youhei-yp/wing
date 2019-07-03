@@ -18,27 +18,67 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/youhei-yp/wing/invar"
 	"github.com/youhei-yp/wing/logger"
 	"github.com/youhei-yp/wing/secure"
 	"io"
 	"os"
-	"path"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
 )
 
-const BufferSize = 1024 * 30
+const (
+	// truncate buffer size for file copy
+	truncateBufferSize = 1024 * 30
+)
 
-// SaveFile save file buffer to target file
-func SaveFile(filepath, filename string, data []byte) error {
-	logger.I("Save file:", filename, "to dir:", filepath)
+// IsFile check whether file path point to a file.
+func IsFile(filepath string) bool {
+	if fileinfo, err := os.Stat(filepath); err == nil {
+		return !fileinfo.IsDir()
+	}
+	return false
+}
 
-	// ensure path exist
+// IsDir check whether dir path point to a directory.
+func IsDir(dirpath string) bool {
+	if fileinfo, err := os.Stat(dirpath); err == nil {
+		return fileinfo.IsDir()
+	}
+	return false
+}
+
+// IsFile2 check whether file point to a file.
+func IsFile2(file *os.File) bool {
+	if fileinfo, err := file.Stat(); err == nil {
+		return !fileinfo.IsDir()
+	}
+	return false
+}
+
+// IsDir2 check whether file point to a directory.
+func IsDir2(file *os.File) bool {
+	if fileinfo, err := file.Stat(); err == nil {
+		return fileinfo.IsDir()
+	}
+	return false
+}
+
+// IsExistFile check whether the file exists.
+func IsExistFile(filepath string) bool {
+	fileinfo, err := os.Stat(filepath)
+	if err != nil || fileinfo == nil {
+		return false
+	}
+	return true
+}
+
+// EnsurePath check the given file path, or create new one if unexist
+func EnsurePath(filepath string) error {
 	if _, err := os.Stat(filepath); err != nil {
 		if os.IsNotExist(err) {
-			if err = os.MkdirAll(filepath, os.ModePerm); err != nil {
+			if err = MakeDirs(filepath); err != nil {
 				logger.E("Make path err:", err)
 				return err
 			}
@@ -46,6 +86,41 @@ func SaveFile(filepath, filename string, data []byte) error {
 			logger.E("Stat path err:", err)
 			return err
 		}
+	}
+	return nil
+}
+
+// MakeDirs create new directory, by default perm is 0777.
+func MakeDirs(dirpath string, perm ...os.FileMode) error {
+	if len(perm) > 0 && perm[0] != 0 {
+		return os.MkdirAll(dirpath, perm[0])
+	}
+	return os.MkdirAll(dirpath, os.ModePerm)
+}
+
+// OpenFileWrite create new file for write content, by default perm is 0666.
+func OpenFileWrite(filepath string, perm ...os.FileMode) (*os.File, error) {
+	if len(perm) > 0 && perm[0] != 0 {
+		return os.OpenFile(filepath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, perm[0])
+	}
+	return os.OpenFile(filepath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+}
+
+// OpenFileTrunc create new file for trunc content, by default perm is 0666.
+func OpenFileTrunc(filepath string, perm ...os.FileMode) (*os.File, error) {
+	if len(perm) > 0 && perm[0] != 0 {
+		return os.OpenFile(filepath, syscall.O_CREAT|os.O_WRONLY|syscall.O_TRUNC, perm[0])
+	}
+	return os.OpenFile(filepath, syscall.O_CREAT|os.O_WRONLY|syscall.O_TRUNC, 0666)
+}
+
+// SaveFile save file buffer to target file
+func SaveFile(filepath, filename string, data []byte) error {
+	logger.I("Save file:", filename, "to dir:", filepath)
+
+	// ensure path exist
+	if err := EnsurePath(filepath); err != nil {
+		return err
 	}
 
 	// ensure file create or open success
@@ -98,7 +173,6 @@ func SaveB64File(filepath, filename string, b64data string) error {
 
 // DeleteFile delete file
 func DeleteFile(file string) error {
-	// ensure file exist
 	if _, err := os.Stat(file); err != nil {
 		if os.IsNotExist(err) {
 			logger.I("Delete unexist file:", file)
@@ -112,232 +186,96 @@ func DeleteFile(file string) error {
 		logger.E("Delete file err:", err)
 		return err
 	}
-	logger.I("Deleted file:", file)
 	return nil
 }
 
-// GetFileMd5 get file's md5 string
-func GetFileMd5(fi string) (string, error) {
-	md := md5.New()
-	f, e := GetFile(fi)
-	if e != nil {
-		return "", e
-	} else {
-		defer f.Close()
-		_, e1 := io.Copy(md, f)
-		if e1 != nil {
-			return "", e1
+// DeletePath delete files and directory.
+func DeletePath(dirpath string) error {
+	if _, err := os.Stat(dirpath); err != nil {
+		if os.IsNotExist(err) {
+			logger.I("Delete unexist dir:", dirpath)
+			return nil
 		}
-		md5 := hex.EncodeToString(md.Sum(nil))
-		return md5, nil
+		logger.E("Stat dir err:", err)
+		return err
 	}
+	return os.RemoveAll(dirpath)
 }
 
-// GetFile return a File for read.
-func GetFile(path string) (*os.File, error) {
-	return os.Open(path)
-}
-
-// CopyFile Copy file.
-func CopyFile(src string, dest string) (s bool, e error) {
-	srcfile, err1 := os.Open(src)
-	if err1 == nil {
-		// create or truncate dest file
-		destfile, err2 := os.OpenFile(dest, syscall.O_CREAT|os.O_WRONLY|syscall.O_TRUNC, 0660)
-		// ensure close files finally
-		defer func() {
-			// log.Print("close src and dest files")
-			srcfile.Close()
-			destfile.Close()
-		}()
-		// if "create or truncate dest file" succeed then start copying
-		if err2 == nil {
-			Try(func() {
-				bs := make([]byte, BufferSize)
-				for {
-					len, e1 := srcfile.Read(bs)
-					if e1 == io.EOF {
-						break
-					}
-					destfile.Write(bs[0:len])
-				}
-				s = true
-			}, func(i interface{}) {
-				s = false
-				e = errors.New(fmt.Sprint(i))
-			})
-		} else {
-			s = false
-			e = errors.New(fmt.Sprint(err2))
-		}
-	} else {
-		s = false
-		e = errors.New("open source file failed")
+// FileMD5 encode file content to md5 string
+func FileMD5(file string) (string, error) {
+	h := md5.New()
+	f, err := os.Open(file)
+	if err != nil {
+		return "", err
 	}
 
-	return s, e
+	defer f.Close()
+	_, err = io.Copy(h, f)
+	if err != nil {
+		return "", err
+	}
+	cipher := h.Sum(nil)
+	return hex.EncodeToString(cipher), nil
 }
 
-// CopyFileTo Copy file to dir.
-func CopyFileTo(src string, dir string) (s bool, e error) {
-	srcfile, err1 := os.Open(src)
-	if err1 == nil {
-		// create or truncate dest file
-		fileInfo, _ := srcfile.Stat()
-		destfile, err2 := os.OpenFile(FixPath(dir)+string(os.PathSeparator)+fileInfo.Name(), syscall.O_CREAT|os.O_WRONLY|syscall.O_TRUNC, 0660)
-		// ensure close files finally
-		defer func() {
-			srcfile.Close()
-			destfile.Close()
-		}()
-		// if "create or truncate dest file" succeed then start copying
-		if err2 == nil {
-			len, e1 := io.Copy(destfile, srcfile)
-			if len != fileInfo.Size() || e1 != nil {
-				s = false
-				e = e1
-			} else {
-				s = true
+// CopyFile Copy source file to traget file.
+func CopyFile(src string, dest string) (bool, error) {
+	srcfile, err := os.Open(src)
+	if err != nil {
+		return false, err
+	}
+	defer srcfile.Close()
+
+	// create or truncate dest file
+	destfile, err := OpenFileTrunc(dest)
+	if err != nil {
+		return false, err
+	}
+	defer destfile.Close()
+
+	// start copying
+	result, err := false, nil
+	Try(func() {
+		buff := make([]byte, truncateBufferSize)
+		for {
+			len, state := srcfile.Read(buff)
+			if state == io.EOF {
+				break
 			}
-		} else {
-			s = false
-			e = errors.New(fmt.Sprint(err2))
+			destfile.Write(buff[0:len])
 		}
-	} else {
-		s = false
-		e = errors.New("open source file failed")
+		result = true
+	}, func(execption error) {
+		err = execption
+	})
+	return result, err
+}
+
+// CopyFileTo copy source file to given dir.
+func CopyFileTo(src string, dir string) (bool, error) {
+	srcfile, err := os.Open(src)
+	if err != nil {
+		return false, err
 	}
+	defer srcfile.Close()
 
-	return s, e
-}
-
-// Exists check whether the file exists.
-func Exists(path string) bool {
-	fi, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		return false
+	// create or truncate dest file
+	fileInfo, _ := srcfile.Stat()
+	filepath := FixPath(dir) + string(os.PathSeparator) + fileInfo.Name()
+	destfile, err := OpenFileTrunc(filepath)
+	if err != nil {
+		return false, err
 	}
-	if fi == nil {
-		return false
+	defer destfile.Close()
+
+	// start copying
+	len, err := io.Copy(destfile, srcfile)
+	if err != nil || len != fileInfo.Size() {
+		logger.E("copy file err:", err)
+		return false, invar.ErrCopyFile
 	}
-	return true
-}
-
-// Delete delete a file or directory.
-// if delete failed, you should find out by yourself where and what is the problem.
-// special: if the file is not exists, this will return true.
-func Delete(path string) bool {
-	_, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		return true
-	}
-	err = os.Remove(path)
-	return nil == err
-}
-
-// DeleteAll delete file or directory.
-// if delete failed, you should find out by yourself where and what is the problem.
-// if is a directory, it will try to delete all files below.
-// special: if the file is not exists, this will return true.
-func DeleteAll(path string) bool {
-	_, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		return true
-	}
-	err = os.RemoveAll(path)
-	return nil == err
-}
-
-// CreateFile create new file.
-func CreateFile(path string) (*os.File, error) {
-	fi, err := os.Create(path)
-	return fi, err
-}
-
-// OpenFile4Write create new file.
-func OpenFile4Write(path string) (*os.File, error) {
-	fi, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	return fi, err
-}
-
-// CreateDir create new directory.
-func CreateDir(path string) error {
-	return os.Mkdir(path, 0777)
-}
-
-// CreateAllDir create new directory.
-func CreateAllDir(path string) error {
-	return os.MkdirAll(path, 0777)
-}
-
-// IsFile check whether path point to a file.
-func IsFile(path string) bool {
-	fi, err := os.Stat(path)
-	if nil == err {
-		return !fi.IsDir()
-	} else {
-		return false
-	}
-}
-
-// IsFile1 check whether path point to a file.
-func IsFile1(file *os.File) bool {
-	fi, err := file.Stat()
-	if nil == err {
-		return !fi.IsDir()
-	} else {
-		return false
-	}
-}
-
-// IsDir check whether path point to a file.
-func IsDir(path string) bool {
-	fi, err := os.Stat(path)
-	if nil == err {
-		return fi.IsDir()
-	} else {
-		return false
-	}
-}
-
-// IsDir1 check whether path point to a file.
-func IsDir1(file *os.File) bool {
-	fi, err := file.Stat()
-	if nil == err {
-		return fi.IsDir()
-	} else {
-		return false
-	}
-}
-
-// MoveFile rename file / move file
-func MoveFile(src string, dest string) error {
-	return os.Rename(src, dest)
-}
-
-// ChangeWorkDir change work directory to path.
-func ChangeWorkDir(path string) error {
-	return os.Chdir(path)
-}
-
-// GetWorkDir get work directory.
-func GetWorkDir() (string, error) {
-	return os.Getwd()
-}
-
-// GetTempDir return a temp directory.
-func GetTempDir() string {
-	return os.TempDir()
-}
-
-// IsAbsPath tell if the path is absolute.
-func IsAbsPath(path string) bool {
-	return filepath.IsAbs(path)
-}
-
-// GetFileExt get file extension
-func GetFileExt(filePath string) string {
-	return path.Ext(filePath)
+	return true, nil
 }
 
 // FixPath fix path, ep:
@@ -350,21 +288,24 @@ func FixPath(input string) string {
 	if len(input) == 0 {
 		return "."
 	}
+
 	// replace windows path separator '\' to '/'
 	replaceMent := strings.Replace(input, "\\", "/", -1)
-
 	for {
 		if strings.Contains(replaceMent, "//") {
 			replaceMent = strings.Replace(replaceMent, "//", "/", -1)
 			continue
 		}
+
 		if replaceMent == "/" {
 			return replaceMent
 		}
+
 		len := len(replaceMent)
 		if len <= 0 {
 			break
 		}
+
 		if replaceMent[len-1:] == "/" {
 			replaceMent = replaceMent[0 : len-1]
 		} else {
@@ -433,26 +374,6 @@ func joinLeft(g []string) string {
 		}
 	}
 	return string(bf.Bytes())
-}
-
-// IsFileByPath check whether path point to a file.
-func IsFileByPath(path string) bool {
-	fi, err := os.Stat(path)
-	if nil == err {
-		return !fi.IsDir()
-	} else {
-		return false
-	}
-}
-
-// IsFileByFile check whether path point to a file.
-func IsFileByFile(file *os.File) bool {
-	fi, err := file.Stat()
-	if nil == err {
-		return !fi.IsDir()
-	} else {
-		return false
-	}
 }
 
 // HumanReadable format the size number of len.

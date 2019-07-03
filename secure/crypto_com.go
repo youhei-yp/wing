@@ -169,3 +169,16 @@ func EncodeB64MD5(original string) string {
 func EncodeMD5B64(original string) string {
 	return EncodeBase64(EncodeMD5(original))
 }
+
+// ToMd5Hex encode multi-input to md5 one string,
+// it same as EncodeMD5 when input only one string.
+func ToMD5Hex(input ...string) string {
+	h := md5.New()
+	if input != nil {
+		for _, v := range input {
+			io.WriteString(h, v)
+		}
+	}
+	cipher := h.Sum(nil)
+	return hex.EncodeToString(cipher)
+}
