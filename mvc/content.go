@@ -78,6 +78,16 @@ func (w *WingProvider) Prepare(query string) (*sql.Stmt, error) {
 	return w.Conn.Prepare(query)
 }
 
+// IsEmpty call sql.Query() to check target data if exist
+func (w *WingProvider) IsEmpty(query string, args ...interface{}) (bool, error) {
+	rows, err := w.Conn.Query(query, args...)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	return !rows.Next(), nil
+}
+
 // QueryOne call sql.Query() to query one record
 func (w *WingProvider) QueryOne(query string, cb ScanCallback, args ...interface{}) error {
 	rows, err := w.Conn.Query(query, args...)

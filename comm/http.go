@@ -31,13 +31,25 @@ const (
 	ContentTypeForm = "application/x-www-form-urlencoded"
 )
 
+// EncodeUrl encode url params
+func EncodeUrl(rawurl string) string {
+	enurl, err := url.Parse(rawurl)
+	if err != nil {
+		logger.E("Encode urlm err:", err)
+		return rawurl
+	}
+	enurl.RawQuery = enurl.Query().Encode()
+	return enurl.String()
+}
+
 // HttpGet handle http get method
 func HttpGet(tagurl string, params ...interface{}) ([]byte, error) {
 	if len(params) > 0 {
 		tagurl = fmt.Sprintf(tagurl, params...)
 	}
 
-	resp, err := http.Get(tagurl)
+	rawurl := EncodeUrl(tagurl)
+	resp, err := http.Get(rawurl)
 	if err != nil {
 		logger.E("Handle http get err:", err)
 		return nil, err
@@ -113,7 +125,8 @@ func HttpClientGet(tagurl string, useTLS bool, params ...interface{}) ([]byte, e
 		tagurl = fmt.Sprintf(tagurl, params...)
 	}
 
-	req, err := http.NewRequest("GET", tagurl, http.NoBody)
+	rawurl := EncodeUrl(tagurl)
+	req, err := http.NewRequest("GET", rawurl, http.NoBody)
 	if err != nil {
 		logger.E("Create http request err:", err)
 		return nil, err
