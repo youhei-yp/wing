@@ -13,6 +13,7 @@ package wing
 // package main
 
 // import (
+// 	_ "github.com/youhei-yp/wing/apis"
 // 	_ "github.com/youhei-yp/wing/comm"
 // 	_ "github.com/youhei-yp/wing/invar"
 // 	_ "github.com/youhei-yp/wing/logger"
