@@ -27,50 +27,50 @@ func getCluserHost(cluser, router string, ver ...string) string {
 
 // ApiAccDelete return the API url for delete account
 func ApiAccDelete(ver ...string) string {
-	return getCluserHost("wgdasurl", "delete", ver...)
+	return getCluserHost("wgdas", "delete", ver...)
 }
 
 // ApiAccLogin return the API url for account login
 func ApiAccLogin(ver ...string) string {
-	return getCluserHost("wgdasurl", "login", ver...)
+	return getCluserHost("wgdas", "login", ver...)
 }
 
 // ApiAccOverPwd return the API url for override account password
 func ApiAccOverPwd(ver ...string) string {
-	return getCluserHost("wgdasurl", "over/pwd", ver...)
+	return getCluserHost("wgdas", "over/pwd", ver...)
 }
 
 // ApiAccProfile return the API url for get account profile
 func ApiAccProfile(ver ...string) string {
-	return getCluserHost("wgdasurl", "profile", ver...)
+	return getCluserHost("wgdas", "profile", ver...)
 }
 
 // ApiAccPubKey return the API url for get account RSA public key
 func ApiAccPubKey(ver ...string) string {
-	return getCluserHost("wgdasurl", "pubkey", ver...)
+	return getCluserHost("wgdas", "pubkey", ver...)
 }
 
 // ApiAccRegister return the API url for register account
 func ApiAccRegister(ver ...string) string {
-	return getCluserHost("wgdasurl", "register", ver...)
+	return getCluserHost("wgdas", "register", ver...)
 }
 
 // ApiAccToken return the API url for get account token
 func ApiAccToken(ver ...string) string {
-	return getCluserHost("wgdasurl", "token", ver...)
+	return getCluserHost("wgdas", "token", ver...)
 }
 
 // ApiAccUpdatePwd return the API url for update account password
 func ApiAccUpdatePwd(ver ...string) string {
-	return getCluserHost("wgdasurl", "update/pwd", ver...)
+	return getCluserHost("wgdas", "update/pwd", ver...)
 }
 
 // ApiAccUpdateRole return the API url for update account role
 func ApiAccUpdateRole(ver ...string) string {
-	return getCluserHost("wgdasurl", "update/role", ver...)
+	return getCluserHost("wgdas", "update/role", ver...)
 }
 
 // ApiAccViaToken return the API url for verify account request token
 func ApiAccViaToken(ver ...string) string {
-	return getCluserHost("wgdasurl", "via", ver...)
+	return getCluserHost("wgdas", "via", ver...)
 }
