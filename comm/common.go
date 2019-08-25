@@ -15,7 +15,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/youhei-yp/wing/logger"
+	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 )
 
 // Try try-catch-finaly method
@@ -54,4 +57,20 @@ func To3Digits(input interface{}) string {
 // ToNDigits fill zero if input digit not enough N
 func ToNDigits(input interface{}, n int) string {
 	return fmt.Sprintf("%0"+strconv.Itoa(n)+"d", input)
+}
+
+// IgnoreSysSignalPIPE ignore system PIPE signal
+func IgnoreSysSignalPIPE() {
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGPIPE)
+	go func() {
+		for {
+			select {
+			case sig := <-sc:
+				if sig == syscall.SIGPIPE {
+					logger.E("!! IGNORE BROKEN PIPE SIGNAL !!")
+				}
+			}
+		}
+	}()
 }
