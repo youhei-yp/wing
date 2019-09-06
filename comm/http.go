@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 const (
@@ -89,6 +90,24 @@ func HttpPost(tagurl string, postdata interface{}, contentType ...string) ([]byt
 		return httpPostForm(tagurl, postdata.(url.Values))
 	}
 	return nil, invar.ErrInvalidParams
+}
+
+// HttpGetString call HttpGet and trim " char both begin and end
+func HttpGetString(tagurl string, params ...interface{}) (string, error) {
+	resp, err := HttpGet(tagurl, params...)
+	if err != nil {
+		return "", err
+	}
+	return strings.Trim(string(resp), "\""), nil
+}
+
+// HttpPostString call HttpPost and trim " char both begin and end.
+func HttpPostString(tagurl string, postdata interface{}, contentType ...string) (string, error) {
+	resp, err := HttpPost(tagurl, postdata, contentType...)
+	if err != nil {
+		return "", err
+	}
+	return strings.Trim(string(resp), "\""), nil
 }
 
 // HttpGetStruct handle http get method and unmarshal data to struct object
@@ -205,7 +224,7 @@ func httpPostJson(tagurl string, postdata interface{}) ([]byte, error) {
 		logger.E("Read post response err:", err)
 		return nil, err
 	}
-	logger.I("Handled http post:", tagurl, "params:", postdata, "resp:", string(body))
+	logger.I("Handled http post:", tagurl, "params:", postdata)
 	return body, nil
 }
 
@@ -223,7 +242,7 @@ func httpPostForm(tagurl string, postdata url.Values) ([]byte, error) {
 		logger.E("Read post response err:", err)
 		return nil, err
 	}
-	logger.I("Handled http post:", tagurl, "params:", postdata, "resp:", string(body))
+	logger.I("Handled http post:", tagurl, "params:", postdata)
 	return body, nil
 }
 
@@ -249,6 +268,6 @@ func httpClientDo(req *http.Request, useTLS bool) ([]byte, error) {
 		logger.E("Read client DO response err:", err)
 		return nil, err
 	}
-	logger.D("Http client DO resp:", string(body))
+	logger.D("Handled http client do")
 	return body, nil
 }
