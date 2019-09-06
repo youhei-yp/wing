@@ -84,9 +84,9 @@ func HttpPost(tagurl string, postdata interface{}, contentType ...string) ([]byt
 
 	switch ct {
 	case ContentTypeJson:
-		httpPostJson(tagurl, postdata)
+		return httpPostJson(tagurl, postdata)
 	case ContentTypeForm:
-		httpPostForm(tagurl, postdata.(url.Values))
+		return httpPostForm(tagurl, postdata.(url.Values))
 	}
 	return nil, invar.ErrInvalidParams
 }
