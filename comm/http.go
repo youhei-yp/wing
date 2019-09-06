@@ -98,7 +98,7 @@ func HttpGetStruct(tagurl string, out interface{}, params ...interface{}) error 
 		return err
 	}
 
-	logger.D("Http Get respose:", body)
+	logger.D("Http Get respose:", string(body))
 	if err := json.Unmarshal(body, out); err != nil {
 		logger.E("Unmarshal bady to struct err:", err)
 		return err
@@ -113,7 +113,7 @@ func HttpPostStruct(tagurl string, postdata, out interface{}, contentType ...str
 		return err
 	}
 
-	logger.D("Http Post respose:", body)
+	logger.D("Http Post respose:", string(body))
 	if err := json.Unmarshal(body, out); err != nil {
 		logger.E("Unmarshal bady to struct err:", err)
 		return err
@@ -166,7 +166,7 @@ func HttpClientGetStruct(tagurl string, useTLS bool, out interface{}, params ...
 		return err
 	}
 
-	logger.D("Http client Get respose:", body)
+	logger.D("Http client Get respose:", string(body))
 	if err := json.Unmarshal(body, out); err != nil {
 		logger.E("Unmarshal bady to struct err:", err)
 		return err
@@ -181,7 +181,7 @@ func HttpClientPostStruct(tagurl string, useTLS bool, out interface{}, postdata 
 		return err
 	}
 
-	logger.D("Http client Post respose:", body)
+	logger.D("Http client Post respose:", string(body))
 	if err := json.Unmarshal(body, out); err != nil {
 		logger.E("Unmarshal bady to struct err:", err)
 		return err
