@@ -174,13 +174,13 @@ func EncodeBase64(original string) string {
 	return ByteToBase64([]byte(original))
 }
 
-// HashToBase64 hash string by sha256 and than to base64 string
-func HashToBase64(data string) string {
+// HashThenBase64 hash string by sha256 and than to base64 string
+func HashThenBase64(data string) string {
 	return ByteToBase64(HashSHA256String(data))
 }
 
-// HashByteToBase64 hash byte array by sha256 and than to base64 string
-func HashByteToBase64(data []byte) string {
+// HashByteThenBase64 hash byte array by sha256 and than to base64 string
+func HashByteThenBase64(data []byte) string {
 	return ByteToBase64(HashSHA256(data))
 }
 
