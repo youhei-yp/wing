@@ -132,7 +132,7 @@ func HashMD5(original []byte) []byte {
 	return h.Sum(nil)
 }
 
-// HashSHA256 hash string by sha256
+// HashSHA256 hash byte array by sha256
 func HashSHA256(original []byte) []byte {
 	// h := sha256.New()
 	// h.Write([]byte(original))
@@ -141,18 +141,47 @@ func HashSHA256(original []byte) []byte {
 	return hashed[:]
 }
 
+// HashSHA256String hash string by sha256
+func HashSHA256String(original string) []byte {
+	return HashSHA256([]byte(original))
+}
+
+// ByteToBase64 decode base64 string to byte array
+func Base64ToByte(ciphertext string) ([]byte, error) {
+	original, err := base64.StdEncoding.DecodeString(ciphertext)
+	if err != nil {
+		return nil, err
+	}
+	return original, nil
+}
+
+// ByteToBase64 encode byte array to base64 string
+func ByteToBase64(original []byte) string {
+	return base64.StdEncoding.EncodeToString(original)
+}
+
 // DecodeBase64 decode from base64 string
 func DecodeBase64(ciphertext string) (string, error) {
 	original, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
-		return ciphertext, err
+		return "", err
 	}
 	return string(original), nil
 }
 
 // EncodeBase64 encode string by base64
 func EncodeBase64(original string) string {
-	return base64.StdEncoding.EncodeToString([]byte(original))
+	return ByteToBase64([]byte(original))
+}
+
+// HashToBase64 hash string by sha256 and than to base64 string
+func HashToBase64(data string) string {
+	return ByteToBase64(HashSHA256String(data))
+}
+
+// HashByteToBase64 hash byte array by sha256 and than to base64 string
+func HashByteToBase64(data []byte) string {
+	return ByteToBase64(HashSHA256(data))
 }
 
 // EncodeMD5 encode string by md5
