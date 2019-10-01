@@ -50,6 +50,7 @@ func HttpGet(tagurl string, params ...interface{}) ([]byte, error) {
 	}
 
 	rawurl := EncodeUrl(tagurl)
+	logger.D("HttpGet:", rawurl)
 	resp, err := http.Get(rawurl)
 	if err != nil {
 		logger.E("Handle http get err:", err)
@@ -62,7 +63,7 @@ func HttpGet(tagurl string, params ...interface{}) ([]byte, error) {
 		logger.E("Read get response err:", err)
 		return nil, err
 	}
-	logger.I("Handled http get:", tagurl)
+	logger.D("HttpGet: body:", string(body))
 	return body, nil
 }
 
@@ -82,6 +83,7 @@ func HttpPost(tagurl string, postdata interface{}, contentType ...string) ([]byt
 	if len(contentType) > 0 {
 		ct = contentType[0]
 	}
+	logger.D("HttpPost:", tagurl, "past data:", postdata, "contentType:", ct)
 
 	switch ct {
 	case ContentTypeJson:
@@ -89,6 +91,7 @@ func HttpPost(tagurl string, postdata interface{}, contentType ...string) ([]byt
 	case ContentTypeForm:
 		return httpPostForm(tagurl, postdata.(url.Values))
 	}
+	logger.E("HttpPost: invalid contentType:", ct)
 	return nil, invar.ErrInvalidParams
 }
 
@@ -121,6 +124,7 @@ func HttpGetStruct(tagurl string, out interface{}, params ...interface{}) error 
 		logger.E("Unmarshal bady to struct err:", err)
 		return err
 	}
+	logger.D("HttpGetStruct:", out)
 	return nil
 }
 
@@ -135,6 +139,7 @@ func HttpPostStruct(tagurl string, postdata, out interface{}, contentType ...str
 		logger.E("Unmarshal bady to struct err:", err)
 		return err
 	}
+	logger.D("HttpPostStruct:", out)
 	return nil
 }
 
@@ -187,6 +192,7 @@ func HttpClientGetStruct(tagurl string, useTLS bool, out interface{}, params ...
 		logger.E("Unmarshal bady to struct err:", err)
 		return err
 	}
+	logger.D("HttpClientGetStruct:", out)
 	return nil
 }
 
@@ -201,6 +207,7 @@ func HttpClientPostStruct(tagurl string, useTLS bool, out interface{}, postdata 
 		logger.E("Unmarshal bady to struct err:", err)
 		return err
 	}
+	logger.D("HttpClientPostStruct:", out)
 	return nil
 }
 
@@ -224,7 +231,7 @@ func httpPostJson(tagurl string, postdata interface{}) ([]byte, error) {
 		logger.E("Read post response err:", err)
 		return nil, err
 	}
-	logger.I("Handled http post:", tagurl, "params:", postdata)
+	logger.D("HttpPostJson:", tagurl, "data:", postdata, "body:", string(body))
 	return body, nil
 }
 
@@ -242,7 +249,7 @@ func httpPostForm(tagurl string, postdata url.Values) ([]byte, error) {
 		logger.E("Read post response err:", err)
 		return nil, err
 	}
-	logger.I("Handled http post:", tagurl, "params:", postdata)
+	logger.D("HttpPostForm:", tagurl, "data:", postdata, "body:", string(body))
 	return body, nil
 }
 
@@ -265,9 +272,9 @@ func httpClientDo(req *http.Request, useTLS bool) ([]byte, error) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		logger.E("Read client DO response err:", err)
+		logger.E("Read client response err:", err)
 		return nil, err
 	}
-	logger.D("Handled http client do")
+	logger.D("HttpClientDo: body:", string(body))
 	return body, nil
 }
