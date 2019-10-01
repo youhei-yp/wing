@@ -319,7 +319,7 @@ func FixPath(input string) string {
 func ReadPropFile(path string) (map[string]string, error) {
 	f, e := os.Open(path)
 	if e == nil {
-		if IsFile1(f) {
+		if IsFile2(f) {
 			propMap := make(map[string]string)
 			reader := bufio.NewReader(f)
 			for {
