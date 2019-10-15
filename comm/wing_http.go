@@ -221,10 +221,16 @@ func httpPostJson(tagurl string, postdata interface{}) ([]byte, error) {
 
 	resp, err := http.Post(tagurl, ContentTypeJson, bytes.NewReader(params))
 	if err != nil {
-		logger.E("Handle http post err:", err)
+		logger.E("Http post json err:", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	// check response status
+	if resp.StatusCode != http.StatusOK {
+		logger.E("Failed http post, status:", resp.StatusCode)
+		return nil, invar.ErrInvalidState
+	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -239,10 +245,16 @@ func httpPostJson(tagurl string, postdata interface{}) ([]byte, error) {
 func httpPostForm(tagurl string, postdata url.Values) ([]byte, error) {
 	resp, err := http.PostForm(tagurl, postdata)
 	if err != nil {
-		logger.E("Handle http post err:", err)
+		logger.E("Http post form err:", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	// check response status
+	if resp.StatusCode != http.StatusOK {
+		logger.E("Failed http post, status:", resp.StatusCode)
+		return nil, invar.ErrInvalidState
+	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -269,6 +281,12 @@ func httpClientDo(req *http.Request, useTLS bool) ([]byte, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	// check response status
+	if resp.StatusCode != http.StatusOK {
+		logger.E("Failed http client, status:", resp.StatusCode)
+		return nil, invar.ErrInvalidState
+	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
