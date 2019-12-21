@@ -12,6 +12,7 @@ package secure
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"strings"
 	"time"
 )
 
@@ -53,4 +54,25 @@ func ViaJwtToken(signedToken, salt string) (string, error) {
 		return claims.Keyword, nil
 	}
 	return "", err
+}
+
+// EncodeJwtKeyword encode account uuid, password and subject string
+func EncodeJwtKeyword(uuid, pwd, subject string) string {
+	sets := []string{uuid, pwd, subject}
+	orikey := strings.Join(sets, ", ")
+	return EncodeBase64(orikey)
+}
+
+// EncodeJwtKeyword decode account uuid, password and subject from jwt keyword string
+func DecodeJwtKeyword(keyword string) (string, string, string) {
+	orikeys, err := DecodeBase64(keyword)
+	if err != nil {
+		return "", "", ""
+	}
+
+	sets := strings.Split(orikeys, ",")
+	for i := len(sets); i < 3; i++ {
+		sets = append(sets, "")
+	}
+	return sets[0], sets[1], sets[2]
 }
