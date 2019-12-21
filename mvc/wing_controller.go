@@ -14,7 +14,6 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/youhei-yp/wing/invar"
 	"github.com/youhei-yp/wing/logger"
-	"net/http"
 )
 
 // WingController the base bee controller to support common utils
@@ -23,107 +22,76 @@ type WingController struct {
 }
 
 // ResponJSON sends a json response to client
-func (c *WingController) ResponJSON(state int, data ...interface{}) {
-	if state != http.StatusOK {
-		c.ErrorState(state)
-		return
-	}
-
+func (c *WingController) ResponJSON(data interface{}) {
 	ctl, act := c.GetControllerAndAction()
-	logger.I("Respone state:", state, ">", ctl+"."+act)
-	c.Ctx.Output.Status = state
-	if len(data) > 0 {
-		c.Data["json"] = data[0]
-	}
+	logger.I("Respone state:OK-JSON >", ctl+"."+act)
+	c.Ctx.Output.Status = invar.StatusOK
+	c.Data["json"] = data
 	c.ServeJSON()
 }
 
 // ResponJSONP sends a jsonp response to client
-func (c *WingController) ResponJSONP(state int, data ...interface{}) {
-	if state != http.StatusOK {
-		c.ErrorState(state)
-		return
-	}
-
+func (c *WingController) ResponJSONP(data interface{}) {
 	ctl, act := c.GetControllerAndAction()
-	logger.I("Respone state:", state, ">", ctl+"."+act)
-	c.Ctx.Output.Status = state
-	if len(data) > 0 {
-		c.Data["jsonp"] = data[0]
-	}
+	logger.I("Respone state:OK-JSONP >", ctl+"."+act)
+	c.Ctx.Output.Status = invar.StatusOK
+	c.Data["jsonp"] = data
 	c.ServeJSONP()
 }
 
 // ResponXML sends xml response to client
-func (c *WingController) ResponXML(state int, data ...interface{}) {
-	if state != http.StatusOK {
-		c.ErrorState(state)
-		return
-	}
-
+func (c *WingController) ResponXML(data interface{}) {
 	ctl, act := c.GetControllerAndAction()
-	logger.I("Respone state:", state, ">", ctl+"."+act)
-	c.Ctx.Output.Status = state
-	if len(data) > 0 {
-		c.Data["xml"] = data[0]
-	}
+	logger.I("Respone state:OK-XML >", ctl+"."+act)
+	c.Ctx.Output.Status = invar.StatusOK
+	c.Data["xml"] = data
 	c.ServeXML()
 }
 
 // ResponYAML sends yaml response to client
-func (c *WingController) ResponYAML(state int, data ...interface{}) {
-	if state != http.StatusOK {
-		c.ErrorState(state)
-		return
-	}
-
+func (c *WingController) ResponYAML(data ...interface{}) {
 	ctl, act := c.GetControllerAndAction()
-	logger.I("Respone state:", state, ">", ctl+"."+act)
-	c.Ctx.Output.Status = state
-	if len(data) > 0 {
-		c.Data["yaml"] = data[0]
-	}
+	logger.I("Respone state:OK-YAML >", ctl+"."+act)
+	c.Ctx.Output.Status = invar.StatusOK
+	c.Data["yaml"] = data
 	c.ServeYAML()
 }
 
 // ResponData sends YAML, XML OR JSON, depending on the value of the Accept header
-func (c *WingController) ResponData(state int, data ...map[interface{}]interface{}) {
-	if state != http.StatusOK {
-		c.ErrorState(state)
-		return
-	}
-
+func (c *WingController) ResponData(data map[interface{}]interface{}) {
 	ctl, act := c.GetControllerAndAction()
-	logger.I("Respone state:", state, ">", ctl+"."+act)
-	c.Ctx.Output.Status = state
-	if len(data) > 0 {
-		c.Data = data[0]
-	}
+	logger.I("Respone state:OK-DATA >", ctl+"."+act)
+	c.Ctx.Output.Status = invar.StatusOK
+	c.Data = data
 	c.ServeFormatted()
 }
 
-// ErrorState response error state to client
-func (c *WingController) ErrorState(state int) {
+// ResponOK sends a json response to client
+func (c *WingController) ResponOK() {
 	ctl, act := c.GetControllerAndAction()
-	logger.E("Respone error:", state, ">", ctl+"."+act)
+	logger.I("Respone state:OK >", ctl+"."+act)
+
+	w := c.Ctx.ResponseWriter
+	w.WriteHeader(invar.StatusOK)
+	// FIXME here maybe not set content type when response error
+	// w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(""))
+}
+
+// ErrorState response error state to client
+func (c *WingController) ErrorState(state int, err ...string) {
+	ctl, act := c.GetControllerAndAction()
+	errmsg := invar.StatusText(state)
+	if len(err) > 0 {
+		errmsg += ", " + err[0]
+	}
+	logger.E("Respone error:", state, ">", ctl+"."+act, errmsg)
 
 	w := c.Ctx.ResponseWriter
 	w.WriteHeader(state)
 	// FIXME here maybe not set content type when response error
 	// w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(""))
-}
-
-// ErrorUnmarshal response unmarshal error state to client
-func (c *WingController) ErrorUnmarshal(tag, err string) {
-	logger.E(tag+":", "unmarshal params, err:", err)
-	c.ErrorState(http.StatusBadRequest)
-}
-
-// ErrorParams response invalid params error state to client
-func (c *WingController) ErrorParams(tag string, ps interface{}) {
-	logger.E(tag+":", "invalid input params:", ps)
-	c.ErrorState(http.StatusBadRequest)
 }
 
 // ClientFrom return client ip from who requested

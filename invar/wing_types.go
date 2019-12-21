@@ -200,18 +200,18 @@ const (
 
 // Frame's status type
 const (
-	// StatusSuccess                                [0],status success
+	// StatusSuccess            [0],status success
 	StatusSuccess byte = iota
 
-	// StatusInternalErr                    [1],status internal error
+	// StatusInternalErr        [1],status internal error
 	StatusInternalErr
 
-	// StatusBadSecret                              [2],status bad secret
+	// StatusBadSecret          [2],status bad secret
 	StatusBadSecret
 
-	// StatusFullConnectionPool             [3],status full connection pool
+	// StatusFullConnectionPool [3],status full connection pool
 	StatusFullConnectionPool
 
-	// StatusFullConnectionPool             [4],status instance id exist
+	// StatusFullConnectionPool [4],status instance id exist
 	StatusInstanceIdExist
 )
