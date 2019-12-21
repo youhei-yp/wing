@@ -21,52 +21,92 @@ type WingController struct {
 	beego.Controller
 }
 
-// ResponJSON sends a json response to client
-func (c *WingController) ResponJSON(data interface{}) {
+// ResponJSON sends a json response to client,
+// it may not send data if the state is not status ok
+func (c *WingController) ResponJSON(state int, data ...interface{}) {
+	if state != invar.StatusOK {
+		c.ErrorState(state)
+		return
+	}
+
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:OK-JSON >", ctl+"."+act)
-	c.Ctx.Output.Status = invar.StatusOK
-	c.Data["json"] = data
+	c.Ctx.Output.Status = state
+	if len(data) > 0 {
+		c.Data["json"] = data[0]
+	}
 	c.ServeJSON()
 }
 
-// ResponJSONP sends a jsonp response to client
-func (c *WingController) ResponJSONP(data interface{}) {
+// ResponJSONP sends a jsonp response to client,
+// it may not send data if the state is not status ok
+func (c *WingController) ResponJSONP(state int, data ...interface{}) {
+	if state != invar.StatusOK {
+		c.ErrorState(state)
+		return
+	}
+
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:OK-JSONP >", ctl+"."+act)
-	c.Ctx.Output.Status = invar.StatusOK
-	c.Data["jsonp"] = data
+	c.Ctx.Output.Status = state
+	if len(data) > 0 {
+		c.Data["jsonp"] = data[0]
+	}
 	c.ServeJSONP()
 }
 
-// ResponXML sends xml response to client
-func (c *WingController) ResponXML(data interface{}) {
+// ResponXML sends xml response to client,
+// it may not send data if the state is not status ok
+func (c *WingController) ResponXML(state int, data ...interface{}) {
+	if state != invar.StatusOK {
+		c.ErrorState(state)
+		return
+	}
+
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:OK-XML >", ctl+"."+act)
-	c.Ctx.Output.Status = invar.StatusOK
-	c.Data["xml"] = data
+	c.Ctx.Output.Status = state
+	if len(data) > 0 {
+		c.Data["xml"] = data[0]
+	}
 	c.ServeXML()
 }
 
-// ResponYAML sends yaml response to client
-func (c *WingController) ResponYAML(data ...interface{}) {
+// ResponYAML sends yaml response to client,
+// it may not send data if the state is not status ok
+func (c *WingController) ResponYAML(state int, data ...interface{}) {
+	if state != invar.StatusOK {
+		c.ErrorState(state)
+		return
+	}
+
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:OK-YAML >", ctl+"."+act)
-	c.Ctx.Output.Status = invar.StatusOK
-	c.Data["yaml"] = data
+	c.Ctx.Output.Status = state
+	if len(data) > 0 {
+		c.Data["yaml"] = data[0]
+	}
 	c.ServeYAML()
 }
 
-// ResponData sends YAML, XML OR JSON, depending on the value of the Accept header
-func (c *WingController) ResponData(data map[interface{}]interface{}) {
+// ResponData sends YAML, XML OR JSON, depending on the value of the Accept header,
+// it may not send data if the state is not status ok
+func (c *WingController) ResponData(state int, data ...map[interface{}]interface{}) {
+	if state != invar.StatusOK {
+		c.ErrorState(state)
+		return
+	}
+
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:OK-DATA >", ctl+"."+act)
-	c.Ctx.Output.Status = invar.StatusOK
-	c.Data = data
+	c.Ctx.Output.Status = state
+	if len(data) > 0 {
+		c.Data = data[0]
+	}
 	c.ServeFormatted()
 }
 
-// ResponOK sends a json response to client
+// ResponOK sends a empty success response to client
 func (c *WingController) ResponOK() {
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:OK >", ctl+"."+act)
