@@ -56,21 +56,23 @@ func ViaJwtToken(signedToken, salt string) (string, error) {
 	return "", err
 }
 
-// EncodeJwtKeyword encode account uuid, password and subject string
+// EncodeJwtKeyword encode account uuid, password and subject string,
+// NOTICE THAT this method joined the uuid, pwd and subject with ';' char!
 func EncodeJwtKeyword(uuid, pwd, subject string) string {
 	sets := []string{uuid, pwd, subject}
-	orikey := strings.Join(sets, ", ")
+	orikey := strings.Join(sets, ";")
 	return EncodeBase64(orikey)
 }
 
-// EncodeJwtKeyword decode account uuid, password and subject from jwt keyword string
+// EncodeJwtKeyword decode account uuid, password and subject from jwt keyword string,
+// NOTICE THAT this method split the keyword by ';' char!
 func DecodeJwtKeyword(keyword string) (string, string, string) {
 	orikeys, err := DecodeBase64(keyword)
 	if err != nil {
 		return "", "", ""
 	}
 
-	sets := strings.Split(orikeys, ",")
+	sets := strings.Split(orikeys, ";")
 	for i := len(sets); i < 3; i++ {
 		sets = append(sets, "")
 	}
