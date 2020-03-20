@@ -50,6 +50,9 @@ func ViaJwtToken(signedToken, salt string) (string, error) {
 	token, err := jwt.ParseWithClaims(signedToken, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(salt), nil
 	})
+	if err != nil {
+		return "", err
+	}
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 		return claims.Keyword, nil
 	}
