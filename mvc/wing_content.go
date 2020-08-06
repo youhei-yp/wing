@@ -230,3 +230,28 @@ func (w *WingProvider) FormatSets(updates interface{}) string {
 	}
 	return strings.Join(sets, ", ")
 }
+
+// Atomicity call sql.Begin() , tx.Rollback() and tx.Commit() to start one transaction
+// All operations in a transaction are either completed or not completed. They will not end in an intermediate link.
+// If an error occurs during the execution of the transaction, it will be rolled back to the state before the transaction starts
+// [CODE:]
+// 		args := make(map[string][]interface{})
+//		args[query] = []interface{}{...arg}
+// [CODE]
+func (w *WingProvider) Atomicity(args map[string][]interface{}) error {
+	atomic, err := w.Conn.Begin()
+	if err != nil {
+		return err
+	}
+	defer atomic.Rollback()
+	for query, arg := range args {
+		result, err := atomic.Exec(query, arg...)
+		if err != nil {
+			return err
+		}
+		if err = w.Affected(result); err != nil {
+			return err
+		}
+	}
+	return atomic.Commit()
+}
