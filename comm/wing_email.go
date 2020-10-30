@@ -11,7 +11,9 @@
 package comm
 
 import (
+	"github.com/youhei-yp/wing/logger"
 	"gopkg.in/gomail.v2"
+	"strings"
 )
 
 /*
@@ -51,6 +53,12 @@ type MailAgent struct {
 	Port int    `json:"port"` // stmp/pop3 port
 }
 
+// EmailContent email template
+type EmailContent struct {
+	Subject string // email title or subject
+	Body    string // email body content
+}
+
 // SendMail send email by mail account, it may set attachment from local file
 func (a *MailAgent) SendMail(to []string, subject, body string, attach ...string) error {
 	m := gomail.NewMessage()
@@ -66,5 +74,37 @@ func (a *MailAgent) SendMail(to []string, subject, body string, attach ...string
 	if err := d.DialAndSend(m); err != nil {
 		return err
 	}
+	return nil
+}
+
+/*
+ * SendCode send verify email with code
+ *
+ * The SMS templetes same as:
+ * [CODE:]
+ * TplEmailRegister = EmailContent{"Account Verify Of XXX", `
+ * <html>
+ *   <body>
+ *     <h3> Dear NAME </h3>
+ *     <p> Thank you for register XXX, the registration verification code is : <h3> TOKEN </h3>, please activate your account in time.</br>
+ *         Please DO NOT forward this code to others. If not myself, please delete this email.</p>
+ *     </br>
+ *     <h5>XXX Technology Co., Ltd</h5>
+ *  </body>
+ * </html>`}
+ * [CODE]
+ */
+func (a *MailAgent) SendCode(email EmailContent, mailto string, code string) error {
+	to := []string{mailto}
+
+	body := strings.Replace(email.Body, "NAME", mailto, 1)
+	body = strings.Replace(body, "TOKEN", code, 1)
+
+	if err := a.SendMail(to, email.Subject, body); err != nil {
+		logger.E("Failed send verify mail to:", mailto)
+		return err
+	}
+
+	logger.I("Send verify mail code:", code, "to:", mailto)
 	return nil
 }
