@@ -108,3 +108,26 @@ func (a *MailAgent) SendCode(email EmailContent, mailto string, code string) err
 	logger.I("Send verify mail code:", code, "to:", mailto)
 	return nil
 }
+
+// SendFormat send mail with formated map
+func (a *MailAgent) SendFormat(email EmailContent, mailto string, format ...map[string]string) error {
+	to := []string{mailto}
+
+	body := email.Body
+	if format != nil && len(format) > 0 {
+		for key, content := range format[0] {
+			if key == "" || content == "" {
+				continue
+			}
+			body = strings.Replace(body, key, content, 1)
+		}
+	}
+
+	if err := a.SendMail(to, email.Subject, body); err != nil {
+		logger.E("Failed send verify mail to:", mailto)
+		return err
+	}
+
+	logger.I("Send mail with formated maps")
+	return nil
+}

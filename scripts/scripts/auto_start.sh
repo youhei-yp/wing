@@ -3,10 +3,10 @@
 # Copyright (c) 2019-2029 Dunyu All Rights Reserved.
 #
 # Author      : yangping
-# Email       : ping.yang@wengold.net
+# Email       : youhei_yp@163.com
 # Version     : 1.0.1
 # Description :
-#   Stop scenegreeting server.
+#   Start xxx server.
 #
 # Prismy.No | Date       | Modified by. | Description
 # -------------------------------------------------------------------
@@ -17,6 +17,12 @@
 bin=`dirname "$0"`
 bin=`cd "$bin"; pwd`
 
-source ${bin}/scripts/exports.sh
-${bin}/scripts/daemon.sh stop ${SERVICE_APP_NAME}
+source ${bin}/exports.sh
+${bin}/daemon.sh start ${SERVICE_APP_NAME}
 
+# waiting for 5 seconds later
+sleep 5
+
+# start browser and fullscreen to show dashbord page
+# chromee --start-fullscreen "http://${SERVICE_HOST_PORT}/${SERVICE_APP_NAME}/"
+chromee --kiosk "http://${SERVICE_HOST_PORT}/${SERVICE_APP_NAME}/"
