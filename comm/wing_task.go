@@ -57,13 +57,12 @@ func GenTask(callback TaskCallback, configs ...int) *Task {
 }
 
 // Post post a task to tasks queue back
-func (t *Task) Post(taskdata interface{}) int64 {
+func (t *Task) Post(taskdata interface{}) {
 	if taskdata == nil {
-		return -1
+		return
 	}
 	t.queue.Push(taskdata)
 	chexe <- "Post Action"
-	return taskdata.(int64)
 }
 
 // SetInterrupt set interrupt flag
