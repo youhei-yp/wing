@@ -8,17 +8,17 @@
 // 00001       2019/05/22   yangping       New version
 // -------------------------------------------------------------------
 
-package wing
+// package wing
 
-// package main
+package main
 
-// import (
-// 	_ "github.com/youhei-yp/wing/apis"
-// 	_ "github.com/youhei-yp/wing/comm"
-// 	_ "github.com/youhei-yp/wing/invar"
-// 	_ "github.com/youhei-yp/wing/logger"
-// 	_ "github.com/youhei-yp/wing/mvc"
-// 	_ "github.com/youhei-yp/wing/secure"
-// )
+import (
+	_ "github.com/youhei-yp/wing/apis"
+	_ "github.com/youhei-yp/wing/comm"
+	_ "github.com/youhei-yp/wing/invar"
+	_ "github.com/youhei-yp/wing/logger"
+	_ "github.com/youhei-yp/wing/mvc"
+	_ "github.com/youhei-yp/wing/secure"
+)
 
-// func main() {}
+func main() {}

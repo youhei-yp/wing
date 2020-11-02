@@ -182,6 +182,21 @@ var (
 
 	// ErrCopyFile failed copy file
 	ErrCopyFile = errors.New("Failed copy file")
+
+	// ErrEmptyData empty data
+	ErrEmptyData = errors.New("Empty data")
+
+	// ErrImgOverSize image file size over
+	ErrImgOverSize = errors.New("Image file size over")
+
+	// ErrAudioOverSize audio file size over
+	ErrAudioOverSize = errors.New("Audio file size over")
+
+	// ErrVideoOverSize video file size over
+	ErrVideoOverSize = errors.New("Video file size over")
+
+	// ErrUnsupportedFile unsupported file format
+	ErrUnsupportedFile = errors.New("Unsupported file format")
 )
 
 var (
@@ -346,4 +361,19 @@ var (
 
 	// WErrCopyFile failed copy file
 	WErrCopyFile = &WingErr{0x1035, ErrCopyFile}
+
+	// WErrEmptyData empty data
+	WErrEmptyData = &WingErr{0x1036, ErrEmptyData}
+
+	// WErrImgOverSize image file size over
+	WErrImgOverSize = &WingErr{0x1037, ErrImgOverSize}
+
+	// WErrAudioOverSize audio file size over
+	WErrAudioOverSize = &WingErr{0x1038, ErrAudioOverSize}
+
+	// WErrVideoOverSize video file size over
+	WErrVideoOverSize = &WingErr{0x1039, ErrVideoOverSize}
+
+	// WErrUnsupportedFile unsupported file format
+	WErrUnsupportedFile = &WingErr{0x103A, ErrUnsupportedFile}
 )

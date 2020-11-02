@@ -22,7 +22,9 @@ import (
 	"github.com/youhei-yp/wing/logger"
 	"github.com/youhei-yp/wing/secure"
 	"io"
+	"mime/multipart"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"syscall"
@@ -387,4 +389,48 @@ func HumanReadable(len int64, during int64) string {
 	} else {
 		return fmt.Sprintf("%.2f", float64(len)/1073741824*1000/float64(during)) + "GB       "
 	}
+}
+
+// VerifyFile verify upload file and size, it support jpg/jpeg/JPG/JPEG/png/PNG/mp3/mp4 suffix.
+func VerifyFile(fh *multipart.FileHeader) (string, error) {
+	suffix := path.Ext(fh.Filename)
+
+	switch suffix {
+	case ".jpg", ".jpeg", ".JPG", ".JPEG", ".png", ".PNG":
+		// image file, must less than 10MB
+		if fh.Size > int64(10<<20) {
+			return "", invar.ErrImgOverSize
+		}
+	case ".mp3":
+		// audio file, must less than 10MB
+		if fh.Size > int64(10<<20) {
+			return "", invar.ErrAudioOverSize
+		}
+	case ".mp4":
+		// vedio file, must less than 500MB
+		if fh.Size > int64(500<<20) {
+			return "", invar.ErrVideoOverSize
+		}
+	default:
+		return "", invar.ErrUnsupportedFile
+	}
+	return suffix, nil
+}
+
+// VerifyFileFormat verify upload file and size in MB.
+func VerifyFileFormat(fh *multipart.FileHeader, format string, size int64) (string, error) {
+	if len(format) == 0 || size <= 0 {
+		return "", invar.ErrInvalidParams
+	}
+
+	suffix := path.Ext(fh.Filename)
+	switch suffix {
+	case format:
+		if fh.Size > int64(size<<20) {
+			return "", invar.ErrImgOverSize
+		}
+	default:
+		return "", invar.ErrUnsupportedFile
+	}
+	return suffix, nil
 }
