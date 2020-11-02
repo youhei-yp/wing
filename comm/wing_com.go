@@ -95,7 +95,7 @@ func GetSortKey(str string) string {
 	if isAZchar {
 		sortKey = string(unicode.ToUpper(firstChar))
 	} else {
-		if unicode.Is(unicode.Han, firstChar) { // Chinese
+		if unicode.Is(unicode.Han, firstChar) { // chinese
 			str1 := pinyin.LazyConvert(string(firstChar), nil)
 			s := []rune(str1[0])
 			sortKey = string(unicode.ToUpper(s[0]))
