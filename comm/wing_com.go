@@ -14,11 +14,14 @@ package comm
 import (
 	"errors"
 	"fmt"
+	"github.com/mozillazg/go-pinyin"
 	"github.com/youhei-yp/wing/logger"
 	"os"
 	"os/signal"
+	"regexp"
 	"strconv"
 	"syscall"
+	"unicode"
 )
 
 // Try try-catch-finaly method
@@ -73,4 +76,34 @@ func IgnoreSysSignalPIPE() {
 			}
 		}
 	}()
+}
+
+// GetSortKey get first letter of Chinese Pinyin
+func GetSortKey(str string) string {
+	if str == "" { // check the input param
+		return "*"
+	}
+
+	// get the first char and verify if it is a~Z char
+	firstChar, sortKey := []rune(str)[0], ""
+	isAZchar, err := regexp.Match("[a-zA-Z]", []byte(str))
+	if err != nil {
+		logger.E("Regexp match err:", err)
+		return "*"
+	}
+
+	if isAZchar {
+		sortKey = string(unicode.ToUpper(firstChar))
+	} else {
+		if unicode.Is(unicode.Han, firstChar) { // Chinese
+			str1 := pinyin.LazyConvert(string(firstChar), nil)
+			s := []rune(str1[0])
+			sortKey = string(unicode.ToUpper(s[0]))
+		} else if unicode.IsNumber(firstChar) { // number
+			sortKey = string(firstChar)
+		} else { // other language
+			sortKey = "#"
+		}
+	}
+	return sortKey
 }
