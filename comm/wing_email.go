@@ -11,7 +11,6 @@
 package comm
 
 import (
-	"github.com/youhei-yp/wing/logger"
 	"gopkg.in/gomail.v2"
 	"strings"
 )
