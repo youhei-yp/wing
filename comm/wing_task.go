@@ -24,7 +24,6 @@ type Task struct {
 }
 
 var chexe = make(chan string)
-var chnxt = make(chan string)
 
 // TaskCallback task callback
 type TaskCallback func(data interface{}) error
@@ -60,10 +59,11 @@ func GenTask(callback TaskCallback, configs ...int) *Task {
 // Post post a task to tasks queue back
 func (t *Task) Post(taskdata interface{}) {
 	if taskdata == nil {
+		logger.E("Invalid task data, abort post")
 		return
 	}
 	t.queue.Push(taskdata)
-	chexe <- "Post Action"
+	t.innerPostFor("Post Action")
 }
 
 // SetInterrupt set interrupt flag
@@ -76,6 +76,16 @@ func (t *Task) SetInterval(interval int) {
 	if interval > 0 {
 		t.interval = time.Duration(interval * 1000)
 	}
+}
+
+// innerPostFor start runtime to post action
+func (t *Task) innerPostFor(action string) {
+	logger.I("Start runtime to post action:", action)
+	go func() {
+		logger.I("Per-post action:", action, ", blocking for read")
+		chexe <- action
+		logger.I("Aft-post action:", action, ", release blocking")
+	}()
 }
 
 // innerTaskExecuter task execte monitor to listen tasks
@@ -118,11 +128,7 @@ func (t *Task) innerTaskExecuter(callback TaskCallback) {
 				time.Sleep(t.interval)
 			}
 			t.executing = false
-			chnxt <- "Post Next"
-
-		case <-chnxt:
-			logger.I("Received next require, post action...")
-			chexe <- "Next Action"
+			t.innerPostFor("Next Action")
 		}
 		logger.I("Exit task select!")
 	}
