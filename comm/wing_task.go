@@ -24,6 +24,7 @@ type Task struct {
 }
 
 var chexe = make(chan string)
+var chnxt = make(chan string)
 
 // TaskCallback task callback
 type TaskCallback func(data interface{}) error
@@ -79,45 +80,50 @@ func (t *Task) SetInterval(interval int) {
 
 // innerTaskExecuter task execte monitor to listen tasks
 func (t *Task) innerTaskExecuter(callback TaskCallback) {
-	select {
-	case action := <-chexe:
-		logger.I("Received request from:", action)
-		if callback == nil {
-			logger.E("Nil task callback, abort request")
-			break
-		}
-
-		// check current if executing status
-		if t.executing {
-			logger.W("Bussying now, try the next time...")
-			break
-		}
-
-		// flag on executing and popup the topmost task to execte
-		t.executing = true
-		taskdata, err := t.queue.Pop()
-		if err != nil {
-			t.executing = false
-			logger.I("Executed all task")
-			break
-		}
-
-		if err := callback(taskdata); err != nil {
-			logger.E("Execute task callback err:", err)
-			if t.interrupt {
-				logger.I("Interrupted tasks on error")
-				t.executing = false
+	for {
+		logger.I("Blocking for select...")
+		select {
+		case action := <-chexe:
+			logger.I("Received request from:", action)
+			if callback == nil {
+				logger.E("Nil task callback, abort request")
 				break
 			}
-		}
-		if t.interval > 0 {
-			logger.I("Waiting to execute the next task after:", t.interval)
-			time.Sleep(t.interval)
-		}
-		t.executing = false
 
-		logger.I("Posting to new require...")
-		go func() { chexe <- "Next Action" }()
-		logger.I("Posted the new require...")
+			// check current if executing status
+			if t.executing {
+				logger.W("Bussying now, try the next time...")
+				break
+			}
+
+			// flag on executing and popup the topmost task to execte
+			t.executing = true
+			taskdata, err := t.queue.Pop()
+			if err != nil {
+				t.executing = false
+				logger.I("Executed all task")
+				break
+			}
+
+			if err := callback(taskdata); err != nil {
+				logger.E("Execute task callback err:", err)
+				if t.interrupt {
+					logger.I("Interrupted tasks on error")
+					t.executing = false
+					break
+				}
+			}
+			if t.interval > 0 {
+				logger.I("Waiting to execute the next task after:", t.interval)
+				time.Sleep(t.interval)
+			}
+			t.executing = false
+			chnxt <- "Post Next"
+
+		case <-chnxt:
+			logger.I("Received next require, post action...")
+			chexe <- "Next Action"
+		}
+		logger.I("Exit task select!")
 	}
 }
