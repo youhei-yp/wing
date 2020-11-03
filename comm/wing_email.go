@@ -96,23 +96,19 @@ func (a *MailAgent) SendMail(to []string, subject, body string, attach ...string
  */
 func (a *MailAgent) SendCode(email EmailContent, mailto string, code string) error {
 	to := []string{mailto}
-
 	body := strings.Replace(email.Body, "NAME", mailto, 1)
 	body = strings.Replace(body, "TOKEN", code, 1)
-
-	if err := a.SendMail(to, email.Subject, body); err != nil {
-		logger.E("Failed send verify mail to:", mailto)
-		return err
-	}
-
-	logger.I("Send verify mail code:", code, "to:", mailto)
-	return nil
+	return a.SendMail(to, email.Subject, body)
 }
 
 // SendFormat send mail with formated map
 func (a *MailAgent) SendFormat(email EmailContent, mailto string, format ...map[string]string) error {
-	to := []string{mailto}
+	return a.SendAttach(email, mailto, "", format...)
+}
 
+// SendAttach send mail with formated map and attach file
+func (a *MailAgent) SendAttach(email EmailContent, mailto, attach string, format ...map[string]string) error {
+	to := []string{mailto}
 	body := email.Body
 	if format != nil && len(format) > 0 {
 		for key, content := range format[0] {
@@ -122,12 +118,5 @@ func (a *MailAgent) SendFormat(email EmailContent, mailto string, format ...map[
 			body = strings.Replace(body, key, content, 1)
 		}
 	}
-
-	if err := a.SendMail(to, email.Subject, body); err != nil {
-		logger.E("Failed send verify mail to:", mailto)
-		return err
-	}
-
-	logger.I("Send mail with formated maps")
-	return nil
+	return a.SendMail(to, email.Subject, body, attach)
 }

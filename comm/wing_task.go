@@ -81,17 +81,13 @@ func (t *Task) SetInterval(interval int) {
 // innerPostFor start runtime to post action
 func (t *Task) innerPostFor(action string) {
 	logger.I("Start runtime to post action:", action)
-	go func() {
-		logger.I("Per-post action:", action, ", blocking for read")
-		chexe <- action
-		logger.I("Aft-post action:", action, ", release blocking")
-	}()
+	go func() { chexe <- action }()
 }
 
-// innerTaskExecuter task execte monitor to listen tasks
+// innerTaskExecuter task execute monitor to listen tasks
 func (t *Task) innerTaskExecuter(callback TaskCallback) {
 	for {
-		logger.I("Blocking for select...")
+		logger.I("Blocking for task requir select...")
 		select {
 		case action := <-chexe:
 			logger.I("Received request from:", action)
@@ -111,25 +107,24 @@ func (t *Task) innerTaskExecuter(callback TaskCallback) {
 			taskdata, err := t.queue.Pop()
 			if err != nil {
 				t.executing = false
-				logger.I("Executed all task")
+				logger.I("Executed all tasks")
 				break
 			}
 
 			if err := callback(taskdata); err != nil {
 				logger.E("Execute task callback err:", err)
 				if t.interrupt {
-					logger.I("Interrupted tasks on error")
+					logger.I("Interrupted tasks when case error")
 					t.executing = false
 					break
 				}
 			}
 			if t.interval > 0 {
-				logger.I("Waiting to execute the next task after:", t.interval)
+				logger.I("Waiting to next task after:", t.interval)
 				time.Sleep(t.interval)
 			}
 			t.executing = false
 			t.innerPostFor("Next Action")
 		}
-		logger.I("Exit task select!")
 	}
 }
