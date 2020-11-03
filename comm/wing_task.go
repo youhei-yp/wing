@@ -89,7 +89,7 @@ func (t *Task) innerTaskExecuter(callback TaskCallback) {
 
 		// check current if executing status
 		if t.executing {
-			logger.W("Executing task, waiting the next request...")
+			logger.W("Bussying now, try the next time...")
 			return
 		}
 
@@ -102,12 +102,16 @@ func (t *Task) innerTaskExecuter(callback TaskCallback) {
 			return
 		}
 
-		if err := callback(taskdata); t.interrupt && err != nil {
-			t.executing = false
-			logger.I("Interrupted tasks by case err:", err)
-			return
+		if err := callback(taskdata); err != nil {
+			logger.E("Execute task callback err:", err)
+			if t.interrupt {
+				logger.I("Interrupted tasks on error")
+				t.executing = false
+				return
+			}
 		}
 		if t.interval > 0 {
+			logger.I("Waiting to execute the next task after:", t.interval)
 			time.Sleep(t.interval)
 		}
 		t.executing = false

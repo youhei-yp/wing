@@ -70,7 +70,7 @@ func (a *MailAgent) SendMail(to []string, subject, body string, attach ...string
 		m.Attach(attach[0])
 	}
 
-	d := gomail.NewPlainDialer(a.Host, a.Port, a.Acc, a.Pwd)
+	d := gomail.NewDialer(a.Host, a.Port, a.Acc, a.Pwd)
 	if err := d.DialAndSend(m); err != nil {
 		return err
 	}
