@@ -134,6 +134,18 @@ func (c *WingController) ErrorState(state int, err ...string) {
 	w.Write([]byte(""))
 }
 
+// ErrorUnmarshal response unmarshal error state to client
+func (c *WingController) ErrorUnmarshal(tag, err string) {
+	logger.E(tag+":", "unmarshal params, err:", err)
+	c.ErrorState(invar.StatusErrParseParams)
+}
+
+// ErrorParams response invalid params error state to client
+func (c *WingController) ErrorParams(tag string, ps interface{}) {
+	logger.E(tag+":", "invalid input params:", ps)
+	c.ErrorState(invar.StatusErrParseParams)
+}
+
 // ClientFrom return client ip from who requested
 func (c *WingController) ClientFrom() string {
 	return c.Ctx.Request.RemoteAddr
