@@ -1,6 +1,6 @@
 module github.com/youhei-yp/wing
 
-go 1.12
+go 1.14
 
 replace (
 	golang.org/x/crypto => github.com/golang/crypto v0.0.0-20190506204251-e1dfcc566284
