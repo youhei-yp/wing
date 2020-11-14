@@ -72,6 +72,48 @@ func GenCode() string {
 	return (string)(code)
 }
 
+// GenCodeFrom generate a code from given int64 data
+func GenCodeFrom(src int64) string {
+	radix := (int64)(len(radixCodeCharMap))
+
+	code := []byte{}
+	for v := src; v > 0; v /= radix {
+		i := v % radix
+		code = append(code, radixCodeCharMap[i])
+	}
+	return (string)(code)
+}
+
+// GenRandCode generate a code by using current nanosecond and append random suffix
+func GenRandCode() string {
+	now := time.Now().UnixNano()
+	radix := (int64)(len(radixCodeCharMap))
+
+	code := []byte{}
+	for v := now; v > 0; v /= radix {
+		i := v % radix
+		code = append(code, radixCodeCharMap[i])
+	}
+
+	rand.Seed(now)
+	return fmt.Sprintf("%s%04d", (string)(code), rand.Intn(1000))
+}
+
+// GenRandCodeFrom generate a code from given int64 data and append random suffix
+func GenRandCodeFrom(src int64) string {
+	radix := (int64)(len(radixCodeCharMap))
+
+	code := []byte{}
+	for v := src; v > 0; v /= radix {
+		i := v % radix
+		code = append(code, radixCodeCharMap[i])
+	}
+
+	now := time.Now().UnixNano()
+	rand.Seed(now)
+	return fmt.Sprintf("%s%04d", (string)(code), rand.Intn(1000))
+}
+
 // GenToken convert to lower string and encode by base64 -> md5
 func GenToken(original string) string {
 	return EncodeB64MD5(strings.ToLower(original))
