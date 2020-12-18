@@ -13,10 +13,11 @@ package mvc
 import (
 	"database/sql"
 	"fmt"
-	"github.com/astaxie/beego"
-	"github.com/youhei-yp/wing/invar"
 	"reflect"
 	"strings"
+
+	"github.com/astaxie/beego"
+	"github.com/youhei-yp/wing/invar"
 )
 
 // WingProvider content provider to support database utils
@@ -45,6 +46,31 @@ func OpenDatabase(charset string) error {
 	dsn := fmt.Sprintf("%s:%s@/%s?charset=%s",
 		beego.AppConfig.String("dbuser"), beego.AppConfig.String("dbpwd"),
 		beego.AppConfig.String("dbname"), charset)
+
+	// open and connect database
+	con, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return err
+	}
+
+	// check database validable
+	if err = con.Ping(); err != nil {
+		return err
+	}
+
+	con.SetMaxIdleConns(100)
+	con.SetMaxOpenConns(100)
+	WingHelper = &WingProvider{con}
+	return nil
+}
+
+// OpenDatabaseWithIP connect database and check ping result,
+// the connections holded by mvc.WingHelper object,
+// the charset maybe 'utf8' or 'utf8mb4' same as database set.
+func OpenDatabaseWithIP(charset string) error {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s",
+		beego.AppConfig.String("dbuser"), beego.AppConfig.String("dbpwd"),
+		beego.AppConfig.String("dbip"), beego.AppConfig.String("dbname"), charset)
 
 	// open and connect database
 	con, err := sql.Open("mysql", dsn)
