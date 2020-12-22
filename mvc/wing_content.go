@@ -41,10 +41,17 @@ var (
 // OpenDatabase connect database and check ping result,
 // the connections holded by mvc.WingHelper object,
 // the charset maybe 'utf8' or 'utf8mb4' same as database set.
-func OpenDatabase(charset string) error {
-	dsn := fmt.Sprintf("%s:%s@/%s?charset=%s",
-		beego.AppConfig.String("dbuser"), beego.AppConfig.String("dbpwd"),
-		beego.AppConfig.String("dbname"), charset)
+func OpenDatabase(charset string, confighost ...bool) error {
+	dsn := ""
+	if confighost != nil && len(confighost) > 0 && confighost[0] {
+		dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s",
+			beego.AppConfig.String("dbuser"), beego.AppConfig.String("dbpwd"),
+			beego.AppConfig.String("dbhost"), beego.AppConfig.String("dbname"), charset)
+	} else {
+		dsn = fmt.Sprintf("%s:%s@/%s?charset=%s",
+			beego.AppConfig.String("dbuser"), beego.AppConfig.String("dbpwd"),
+			beego.AppConfig.String("dbname"), charset)
+	}
 
 	// open and connect database
 	con, err := sql.Open("mysql", dsn)
