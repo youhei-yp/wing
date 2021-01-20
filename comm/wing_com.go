@@ -14,6 +14,8 @@ package comm
 import (
 	"errors"
 	"fmt"
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/plugins/cors"
 	"github.com/mozillazg/go-pinyin"
 	"github.com/youhei-yp/wing/logger"
 	"os"
@@ -106,4 +108,15 @@ func GetSortKey(str string) string {
 		}
 	}
 	return sortKey
+}
+
+// AccessAllowOriginBy allow cross domain access for the given origins
+func AccessAllowOriginBy(category int, origins string) {
+	beego.InsertFilter("*", category, cors.Allow(&cors.Options{
+		AllowAllOrigins: true,
+		AllowOrigins:    []string{origins}, // use to set allow Origins
+		AllowMethods:    []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:    []string{"Origin", "Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
+		ExposeHeaders:   []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
+	}))
 }
