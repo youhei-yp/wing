@@ -120,3 +120,11 @@ func AccessAllowOriginBy(category int, origins string) {
 		ExposeHeaders:   []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
 	}))
 }
+
+// AccessAllowOriginByLocal allow cross domain access for localhost
+func AccessAllowOriginByLocal(category int) {
+	if beego.BConfig.Listen.HTTPPort > 0 {
+		localhosturl := fmt.Sprintf("http://127.0.0.1:%v/", beego.BConfig.Listen.HTTPPort)
+		AccessAllowOriginBy(category, localhosturl)
+	}
+}
