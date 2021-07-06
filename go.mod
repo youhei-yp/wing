@@ -16,12 +16,14 @@ replace (
 require (
 	github.com/766b/go-outliner v0.0.0-20180511142203-fc6edecdadd7 // indirect
 	github.com/BurntSushi/toml v0.3.1
+	github.com/adamzy/cedar-go v0.0.0-20170805034717-80a9c64b256d // indirect
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/astaxie/beego v1.11.1
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/googollee/go-socket.io v1.0.1
+	github.com/huichen/sego v0.0.0-20180617034105-3f3c8a8cfacc
 	github.com/mozillazg/go-pinyin v0.18.0
 	github.com/satori/go.uuid v1.2.0
 	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
