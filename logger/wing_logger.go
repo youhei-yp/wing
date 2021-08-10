@@ -67,6 +67,13 @@ func getLoggerConfigs() string {
 	return "{\"filename\":\"logs/" + app + ".log\", \"daily\":true, \"maxdays\":" + maxdays + "}"
 }
 
+// SetOutputLogger close console logger on prod mode and only remain file logger.
+func SetOutputLogger() {
+	if beego.BConfig.RunMode != "dev" && GetLevel() != LevelDebug {
+		beego.BeeLogger.DelLogger(logs.AdapterConsole)
+	}
+}
+
 // GetLevel return current logger output level
 func GetLevel() string {
 	switch beego.BeeLogger.GetLevel() {
