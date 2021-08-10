@@ -19,6 +19,7 @@ package wing
 // 	_ "github.com/youhei-yp/wing/logger"
 // 	_ "github.com/youhei-yp/wing/mvc"
 // 	_ "github.com/youhei-yp/wing/secure"
+// 	_ "github.com/youhei-yp/wing/wechat"
 // )
 
 // func main() {}
