@@ -392,23 +392,34 @@ func HumanReadable(len int64, during int64) string {
 }
 
 // VerifyFile verify upload file and size, it support jpg/jpeg/JPG/JPEG/png/PNG/mp3/mp4 suffix.
-func VerifyFile(fh *multipart.FileHeader) (string, error) {
+func VerifyFile(fh *multipart.FileHeader, maxBytes ...int64) (string, error) {
 	suffix := path.Ext(fh.Filename)
 
+	maxSizeInByte := (int64)(0)
+	if maxBytes != nil && len(maxBytes) > 0 && maxBytes[0] > 0 {
+		maxSizeInByte = maxBytes[0]
+	}
+
 	switch suffix {
-	case ".jpg", ".jpeg", ".JPG", ".JPEG", ".png", ".PNG":
-		// image file, must less than 10MB
-		if fh.Size > int64(10<<20) {
+	case ".jpg", ".jpeg", ".JPG", ".JPEG", ".png", ".PNG", ".mp3":
+		if maxSizeInByte == 0 {
+			maxSizeInByte = 10 << 20 // set default max size
+		}
+
+		// image file, must less than 10MB or given size
+		if fh.Size > maxSizeInByte {
+			if suffix == ".mp3" {
+				return "", invar.ErrAudioOverSize
+			}
 			return "", invar.ErrImgOverSize
 		}
-	case ".mp3":
-		// audio file, must less than 10MB
-		if fh.Size > int64(10<<20) {
-			return "", invar.ErrAudioOverSize
-		}
 	case ".mp4":
-		// vedio file, must less than 500MB
-		if fh.Size > int64(500<<20) {
+		if maxSizeInByte == 0 {
+			maxSizeInByte = 500 << 20 // set default max size
+		}
+
+		// vedio file, must less than 500MB or given size
+		if fh.Size > maxSizeInByte {
 			return "", invar.ErrVideoOverSize
 		}
 	default:
