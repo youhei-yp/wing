@@ -197,6 +197,18 @@ var (
 
 	// ErrUnsupportedFile unsupported file format
 	ErrUnsupportedFile = errors.New("Unsupported file format")
+
+	// ErrInvalidConfigs invalid config datas
+	ErrInvalidConfigs = errors.New("Invalid config datas")
+
+	// ErrInvalidRedisOptions invalid redis options
+	ErrInvalidRedisOptions = errors.New("Invalid redis options")
+
+	// ErrUnexistRedisKey unexist redis key
+	ErrUnexistRedisKey = errors.New("Unexist redis key")
+
+	// ErrNoAssociatedExpire no associated expire
+	ErrNoAssociatedExpire = errors.New("No associated expire")
 )
 
 var (
@@ -376,4 +388,16 @@ var (
 
 	// WErrUnsupportedFile unsupported file format
 	WErrUnsupportedFile = &WingErr{0x103A, ErrUnsupportedFile}
+
+	// WErrInvalidConfigs invalid config datas
+	WErrInvalidConfigs = &WingErr{0x103B, ErrInvalidConfigs}
+
+	// WErrInvalidRedisOptions invalid redis options
+	WErrInvalidRedisOptions = &WingErr{0x103C, ErrInvalidRedisOptions}
+
+	// WErrUnexistRedisKey unexist redis key
+	WErrUnexistRedisKey = &WingErr{0x103D, ErrUnexistRedisKey}
+
+	// WErrNoAssociatedExpire no associated expire
+	WErrNoAssociatedExpire = &WingErr{0x103E, ErrNoAssociatedExpire}
 )

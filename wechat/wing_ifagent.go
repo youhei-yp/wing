@@ -107,13 +107,25 @@ type WxResult struct {
 	Message string `json:"errmsg"`
 }
 
+// WxOption replace option key-value struct
+type WxOption struct {
+	RepKey   string `json:"repkey"`
+	RepValue string `json:"repvalue"`
+}
+
 // ToWxCodeUrl bind redirect url and return wechat url to get request code
 // Step 1
-func (w *WxIFAgent) ToWxCodeUrl(redirecturl string) string {
+func (w *WxIFAgent) ToWxCodeUrl(redirecturl string, state ...string) string {
 	codeurl := "https://open.weixin.qq.com/connect/oauth2/authorize?appid=APPID&redirect_uri=REDIRECT_URI&response_type=code&scope=SCOPE&state=STATE#wechat_redirect"
 	codeurl = strings.Replace(codeurl, "APPID", w.AppID, -1)
 	codeurl = strings.Replace(codeurl, "REDIRECT_URI", redirecturl, -1)
-	return strings.Replace(codeurl, "SCOPE", w.Scope, -1)
+	codeurl = strings.Replace(codeurl, "SCOPE", w.Scope, -1)
+
+	// replace the STATE field by given state as optional param
+	if state != nil && len(state) > 0 && len(state[0]) > 0 {
+		codeurl = strings.Replace(codeurl, "STATE", state[0], -1)
+	}
+	return codeurl
 }
 
 // ToWxTokenUrl bind request code and return wechat url to get access token

@@ -28,29 +28,60 @@ type WingProvider struct {
 type ScanCallback func(rows *sql.Rows) error
 
 const (
-	// limitPageItems limit to show lits items in one page
-	limitPageItems = 50
+	dbConfigUser = "database::user" // configs key of database user
+	dbConfigPwd  = "database::pwd"  // configs key of database password
+	dbConfigHost = "database::host" // configs key of database host and port
+	dbConfigName = "database::name" // configs key of database name
 )
 
 var (
 	// WingHelper content provider to hold database connections,
 	// it will nil before mvc.OpenDatabase() called
 	WingHelper *WingProvider
+
+	// limitPageItems limit to show lits items in one page, default is 50,
+	// you can use SetLimitPageItems() to change the limit value.
+	limitPageItems = 50
 )
+
+// readDBCofnigs read database params from config file, than verify them if empty
+func readDBCofnigs(usingTCP bool) (string, string, string, string, error) {
+	user := beego.AppConfig.String(dbConfigUser)
+	pwd := beego.AppConfig.String(dbConfigPwd)
+	host := beego.AppConfig.String(dbConfigHost)
+	name := beego.AppConfig.String(dbConfigName)
+
+	if (usingTCP && (user == "" || pwd == "" || host == "" || name == "")) ||
+		(!usingTCP && (user == "" || pwd == "" || name == "")) {
+		return "", "", "", "", invar.ErrInvalidConfigs
+	}
+	return user, pwd, host, name, nil
+}
 
 // OpenDatabase connect database and check ping result,
 // the connections holded by mvc.WingHelper object,
 // the charset maybe 'utf8' or 'utf8mb4' same as database set.
-func OpenDatabase(charset string, confighost ...bool) error {
+//
+// NOTICE : you must config database params in /conf/app.config file as:
+//	~
+//	[database]
+//	host = "127.0.0.1:3306"
+//	name = "sampledb"
+//	user = "root"
+//	pwd  = "123456"
+//	~
+func OpenDatabase(charset string, useTCP ...bool) error {
+	isUseTCP := (useTCP != nil && len(useTCP) > 0 && useTCP[0])
+	dbuser, dbpwd, dbhost, dbname, err := readDBCofnigs(isUseTCP)
+	if err != nil {
+		return err
+	}
+
 	dsn := ""
-	if confighost != nil && len(confighost) > 0 && confighost[0] {
-		dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s",
-			beego.AppConfig.String("dbuser"), beego.AppConfig.String("dbpwd"),
-			beego.AppConfig.String("dbhost"), beego.AppConfig.String("dbname"), charset)
+	if isUseTCP {
+		dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s", dbuser, dbpwd, dbhost, dbname, charset)
 	} else {
-		dsn = fmt.Sprintf("%s:%s@/%s?charset=%s",
-			beego.AppConfig.String("dbuser"), beego.AppConfig.String("dbpwd"),
-			beego.AppConfig.String("dbname"), charset)
+		dsn = fmt.Sprintf("%s:%s@/%s?charset=%s", dbuser, dbpwd, dbname, charset)
 	}
 
 	// open and connect database
@@ -68,6 +99,14 @@ func OpenDatabase(charset string, confighost ...bool) error {
 	con.SetMaxOpenConns(100)
 	WingHelper = &WingProvider{con}
 	return nil
+}
+
+// SetLimitPageItems set global setting of limit items in page,
+// the input value must range in (0, 1000].
+func SetLimitPageItems(limit int) {
+	if limit > 0 && limit <= 1000 {
+		limitPageItems = limit
+	}
 }
 
 // Stub return content provider connection
@@ -187,22 +226,22 @@ func (w *WingProvider) Affected(result sql.Result) error {
 }
 
 // FormatSets format update sets for sql update
-// [CODE:]
-// sets := w.FormatSets(struct {
-//     StringFiled string
-//     EmptyString string
-//     BlankString string
-//     TrimString  string
-//     IntFiled    int
-//     I32Filed    int32
-//     I64Filed    int64
-//     F32Filed    float32
-//     F64Filed    float64
-//     BoolFiled   bool
-// }{"string", "", " ", " trim ", 123, 32, 64, 32.123, 64.123, true})
 //
-// //sets: stringfiled='string', trimstring='trim', intfiled=123, i32filed=32, i64filed=64, f32filed=32.123, f64filed=64.123, boolfiled=true
-// logger.I("sets:", sets)
+// [CODE:]
+//	sets := w.FormatSets(struct {
+//		StringFiled string
+//		EmptyString string
+//		BlankString string
+//		TrimString  string
+//		IntFiled    int
+//		I32Filed    int32
+//		I64Filed    int64
+//		F32Filed    float32
+//		F64Filed    float64
+//		BoolFiled   bool
+//	}{"string", "", " ", " trim ", 123, 32, 64, 32.123, 64.123, true})
+//	// sets: stringfiled='string', trimstring='trim', intfiled=123, i32filed=32, i64filed=64, f32filed=32.123, f64filed=64.123, boolfiled=true
+//	logger.I("sets:", sets)
 // [CODE]
 func (w *WingProvider) FormatSets(updates interface{}) string {
 	sets := []string{}
@@ -241,8 +280,9 @@ func (w *WingProvider) FormatSets(updates interface{}) string {
 // Atomicity call sql.Begin() , tx.Rollback() and tx.Commit() to start one transaction
 // All operations in a transaction are either completed or not completed. They will not end in an intermediate link.
 // If an error occurs during the execution of the transaction, it will be rolled back to the state before the transaction starts
+//
 // [CODE:]
-// 		args := make(map[string][]interface{})
+//		args := make(map[string][]interface{})
 //		args[query] = []interface{}{...arg}
 // [CODE]
 func (w *WingProvider) Atomicity(args map[string][]interface{}) error {

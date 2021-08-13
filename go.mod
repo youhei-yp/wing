@@ -15,6 +15,7 @@ require (
 	github.com/astaxie/beego v1.11.1
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/garyburd/redigo v1.6.2
 	github.com/huichen/sego v0.0.0-20180617034105-3f3c8a8cfacc
 	github.com/issue9/assert v1.4.1 // indirect
 	github.com/mozillazg/go-pinyin v0.18.0
