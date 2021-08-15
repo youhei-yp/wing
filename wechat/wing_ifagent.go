@@ -107,12 +107,6 @@ type WxResult struct {
 	Message string `json:"errmsg"`
 }
 
-// WxOption replace option key-value struct
-type WxOption struct {
-	RepKey   string `json:"repkey"`
-	RepValue string `json:"repvalue"`
-}
-
 // ToWxCodeUrl bind redirect url and return wechat url to get request code
 // Step 1
 func (w *WxIFAgent) ToWxCodeUrl(redirecturl string, state ...string) string {
