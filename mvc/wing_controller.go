@@ -143,6 +143,11 @@ func (c *WingController) ErrorState(state int, err ...string) {
 	w.Write([]byte(""))
 }
 
+// ErrorUnmarshal response 400 unmarshal params error state to client
+func (c *WingController) ErrorUnmarshal(err ...string) {
+	c.ErrorState(invar.StatusErrParseParams, err...)
+}
+
 // ErrorParams response 400 invalid params error state to client
 func (c *WingController) ErrorParams(ps interface{}) {
 	c.ErrorState(invar.StatusErrParseParams, ps.(string))
