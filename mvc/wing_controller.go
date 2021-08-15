@@ -21,6 +21,15 @@ type WingController struct {
 	beego.Controller
 }
 
+// printLogWithError printf error log
+func (c *WingController) printLogWithError(tag, msg string, err ...string) {
+	if err != nil && len(err) > 0 {
+		logger.E(tag+":", msg, ", err:", err[0])
+	} else {
+		logger.E(tag+":", msg)
+	}
+}
+
 // ResponJSON sends a json response to client,
 // it may not send data if the state is not status ok
 func (c *WingController) ResponJSON(state int, data ...interface{}) {
@@ -32,7 +41,7 @@ func (c *WingController) ResponJSON(state int, data ...interface{}) {
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:OK-JSON >", ctl+"."+act)
 	c.Ctx.Output.Status = state
-	if len(data) > 0 {
+	if data != nil && len(data) > 0 {
 		c.Data["json"] = data[0]
 	}
 	c.ServeJSON()
@@ -49,7 +58,7 @@ func (c *WingController) ResponJSONP(state int, data ...interface{}) {
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:OK-JSONP >", ctl+"."+act)
 	c.Ctx.Output.Status = state
-	if len(data) > 0 {
+	if data != nil && len(data) > 0 {
 		c.Data["jsonp"] = data[0]
 	}
 	c.ServeJSONP()
@@ -66,7 +75,7 @@ func (c *WingController) ResponXML(state int, data ...interface{}) {
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:OK-XML >", ctl+"."+act)
 	c.Ctx.Output.Status = state
-	if len(data) > 0 {
+	if data != nil && len(data) > 0 {
 		c.Data["xml"] = data[0]
 	}
 	c.ServeXML()
@@ -83,7 +92,7 @@ func (c *WingController) ResponYAML(state int, data ...interface{}) {
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:OK-YAML >", ctl+"."+act)
 	c.Ctx.Output.Status = state
-	if len(data) > 0 {
+	if data != nil && len(data) > 0 {
 		c.Data["yaml"] = data[0]
 	}
 	c.ServeYAML()
@@ -100,7 +109,7 @@ func (c *WingController) ResponData(state int, data ...map[interface{}]interface
 	ctl, act := c.GetControllerAndAction()
 	logger.I("Respone state:OK-DATA >", ctl+"."+act)
 	c.Ctx.Output.Status = state
-	if len(data) > 0 {
+	if data != nil && len(data) > 0 {
 		c.Data = data[0]
 	}
 	c.ServeFormatted()
@@ -122,7 +131,7 @@ func (c *WingController) ResponOK() {
 func (c *WingController) ErrorState(state int, err ...string) {
 	ctl, act := c.GetControllerAndAction()
 	errmsg := invar.StatusText(state)
-	if len(err) > 0 {
+	if err != nil && len(err) > 0 {
 		errmsg += ", " + err[0]
 	}
 	logger.E("Respone error:", state, ">", ctl+"."+act, errmsg)
@@ -134,16 +143,44 @@ func (c *WingController) ErrorState(state int, err ...string) {
 	w.Write([]byte(""))
 }
 
-// ErrorUnmarshal response unmarshal error state to client
-func (c *WingController) ErrorUnmarshal(tag, err string) {
-	logger.E(tag+":", "unmarshal params, err:", err)
-	c.ErrorState(invar.StatusErrParseParams)
+// ErrorParams response 400 invalid params error state to client
+func (c *WingController) ErrorParams(ps interface{}) {
+	c.ErrorState(invar.StatusErrParseParams, ps.(string))
 }
 
-// ErrorParams response invalid params error state to client
-func (c *WingController) ErrorParams(tag string, ps interface{}) {
-	logger.E(tag+":", "invalid input params:", ps)
-	c.ErrorState(invar.StatusErrParseParams)
+// ErrorUnauthed response 401 unauthenticated error state to client
+func (c *WingController) ErrorUnauthed(err ...string) {
+	c.ErrorState(invar.StatusErrUnauthorized, err...)
+}
+
+// ErrorDenind response 403 permission denind error state to client
+func (c *WingController) ErrorDenind(err ...string) {
+	c.ErrorState(invar.StatusErrPermissionDenind, err...)
+}
+
+// ErrorException response 404 not found error state to client
+func (c *WingController) ErrorException(err ...string) {
+	c.ErrorState(invar.StatusErrCaseException, err...)
+}
+
+// ErrorDisabled response 405 function disabled error state to client
+func (c *WingController) ErrorDisabled(err ...string) {
+	c.ErrorState(invar.StatusErrFuncDisabled, err...)
+}
+
+// ErrorInput response 406 invalid inputs error state to client
+func (c *WingController) ErrorInput(err ...string) {
+	c.ErrorState(invar.StatusErrInputParams, err...)
+}
+
+// ErrorDuplicate response 409 duplicate error state to client
+func (c *WingController) ErrorDuplicate(err ...string) {
+	c.ErrorState(invar.StatusErrDuplicate, err...)
+}
+
+// ErrorGone response 410 gone error state to client
+func (c *WingController) ErrorGone(err ...string) {
+	c.ErrorState(invar.StatusErrGone, err...)
 }
 
 // ClientFrom return client ip from who requested
