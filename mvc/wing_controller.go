@@ -58,8 +58,10 @@ func RegisterFieldValidator(tag string, valfunc validator.Func) {
 	}
 }
 
-// responCheckState check respon state and print out log
-func (c *WingController) responCheckState(tag string, needCheck bool, state int, data ...interface{}) {
+// responCheckState check respon state and print out log, the datatype must
+// range in ['json', 'jsonp', 'xml', 'yaml'], if outof range current controller
+// just return blank string to close http connection.
+func (c *WingController) responCheckState(datatype string, needCheck bool, state int, data ...interface{}) {
 	if state != invar.StatusOK {
 		if needCheck {
 			c.ErrorState(state)
@@ -68,18 +70,18 @@ func (c *WingController) responCheckState(tag string, needCheck bool, state int,
 
 		errmsg := invar.StatusText(state)
 		ctl, act := c.GetControllerAndAction()
-		logger.E("Respone "+strings.ToUpper(tag)+" error:", state, ">", ctl+"."+act, errmsg)
+		logger.E("Respone "+strings.ToUpper(datatype)+" error:", state, ">", ctl+"."+act, errmsg)
 	} else {
 		ctl, act := c.GetControllerAndAction()
-		logger.I("Respone state:OK-"+strings.ToUpper(tag)+" >", ctl+"."+act)
+		logger.I("Respone state:OK-"+strings.ToUpper(datatype)+" >", ctl+"."+act)
 	}
 
 	c.Ctx.Output.Status = state
 	if data != nil && len(data) > 0 {
-		c.Data[tag] = data[0]
+		c.Data[datatype] = data[0]
 	}
 
-	switch tag {
+	switch datatype {
 	case "json":
 		c.ServeJSON()
 	case "jsonp":
@@ -88,6 +90,9 @@ func (c *WingController) responCheckState(tag string, needCheck bool, state int,
 		c.ServeXML()
 	case "yaml":
 		c.ServeYAML()
+	default:
+		// just return blank string to close http connection
+		c.Ctx.ResponseWriter.Write([]byte(""))
 	}
 }
 
@@ -271,10 +276,10 @@ func (c *WingController) BindValue(key string, dest interface{}) error {
 //			// directe use c and ps param in this methed.
 //			// ...
 //			return http.StatusOK, "Done business"
-//		})
+//		} /** , false /* not filter error message even code is 40x */ */)
 //	}
 //	[CODE]
-func (c *WingController) DoAfterValidated(ps interface{}, nextFunc NextFunc) {
+func (c *WingController) DoAfterValidated(ps interface{}, nextFunc NextFunc, option ...interface{}) {
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, ps); err != nil {
 		c.ErrorUnmarshal(err.Error())
 		return
@@ -286,18 +291,21 @@ func (c *WingController) DoAfterValidated(ps interface{}, nextFunc NextFunc) {
 		return
 	}
 
+	// parse uncheck option, default is false
+	uncheck := (option != nil && len(option) > 0 && !option[0].(bool))
+
 	// execute business function after validated
 	status, resp := nextFunc()
 	if resp != nil {
-		c.ResponJSON(status, resp)
+		c.responCheckState("json", !uncheck, status, resp)
 	} else {
-		c.ResponJSON(status)
+		c.responCheckState("json", !uncheck, status)
 	}
 }
 
 // DoAfterValidatedXml do bussiness action after success validate the given xml data
 // returned by GenInStruct function, see DoAfterValidated() to get more informations.
-func (c *WingController) DoAfterValidatedXml(ps interface{}, nextFunc NextFunc) {
+func (c *WingController) DoAfterValidatedXml(ps interface{}, nextFunc NextFunc, option ...interface{}) {
 	if err := xml.Unmarshal(c.Ctx.Input.RequestBody, ps); err != nil {
 		c.ErrorUnmarshal(err.Error())
 		return
@@ -309,11 +317,14 @@ func (c *WingController) DoAfterValidatedXml(ps interface{}, nextFunc NextFunc) 
 		return
 	}
 
+	// parse uncheck option, default is false
+	uncheck := (option != nil && len(option) > 0 && !option[0].(bool))
+
 	// execute business function after validated
 	status, resp := nextFunc()
 	if resp != nil {
-		c.ResponXML(status, resp)
+		c.responCheckState("xml", !uncheck, status, resp)
 	} else {
-		c.ResponXML(status)
+		c.responCheckState("xml", !uncheck, status)
 	}
 }
