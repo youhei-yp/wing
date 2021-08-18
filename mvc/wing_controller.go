@@ -17,6 +17,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/youhei-yp/wing/invar"
 	"github.com/youhei-yp/wing/logger"
+	"strings"
 )
 
 // WingController the base bee controller to support common utils
@@ -35,7 +36,7 @@ var (
 	Validator *validator.Validate
 )
 
-// ensureValidatorIns generat the validator instance if need
+// ensureValidatorGenerated generat the validator instance if need
 func ensureValidatorGenerated() {
 	if Validator == nil {
 		Validator = validator.New()
@@ -49,7 +50,7 @@ func RegisterValidators(valmap map[string]validator.Func) {
 	}
 }
 
-// RegisterValidators register validators on struct field level
+// RegisterFieldValidator register validators on struct field level
 func RegisterFieldValidator(tag string, valfunc validator.Func) {
 	ensureValidatorGenerated()
 	if err := Validator.RegisterValidation(tag, valfunc); err != nil {
@@ -57,81 +58,81 @@ func RegisterFieldValidator(tag string, valfunc validator.Func) {
 	}
 }
 
-// printLogWithError printf error log
-func (c *WingController) printLogWithError(tag, msg string, err ...string) {
-	if err != nil && len(err) > 0 {
-		logger.E(tag+":", msg, ", err:", err[0])
+// responCheckState check respon state and print out log
+func (c *WingController) responCheckState(tag string, needCheck bool, state int, data ...interface{}) {
+	if state != invar.StatusOK {
+		if needCheck {
+			c.ErrorState(state)
+			return
+		}
+
+		errmsg := invar.StatusText(state)
+		ctl, act := c.GetControllerAndAction()
+		logger.E("Respone "+strings.ToUpper(tag)+" error:", state, ">", ctl+"."+act, errmsg)
 	} else {
-		logger.E(tag+":", msg)
+		ctl, act := c.GetControllerAndAction()
+		logger.I("Respone state:OK-"+strings.ToUpper(tag)+" >", ctl+"."+act)
+	}
+
+	c.Ctx.Output.Status = state
+	if data != nil && len(data) > 0 {
+		c.Data[tag] = data[0]
+	}
+
+	switch tag {
+	case "json":
+		c.ServeJSON()
+	case "jsonp":
+		c.ServeJSONP()
+	case "xml":
+		c.ServeXML()
+	case "yaml":
+		c.ServeYAML()
 	}
 }
 
 // ResponJSON sends a json response to client,
 // it may not send data if the state is not status ok
 func (c *WingController) ResponJSON(state int, data ...interface{}) {
-	if state != invar.StatusOK {
-		c.ErrorState(state)
-		return
-	}
+	c.responCheckState("json", true, state, data...)
+}
 
-	ctl, act := c.GetControllerAndAction()
-	logger.I("Respone state:OK-JSON >", ctl+"."+act)
-	c.Ctx.Output.Status = state
-	if data != nil && len(data) > 0 {
-		c.Data["json"] = data[0]
-	}
-	c.ServeJSON()
+// ResponJSONUncheck sends a json response to client witchout uncheck state code.
+func (c *WingController) ResponJSONUncheck(state int, dataORerr ...interface{}) {
+	c.responCheckState("json", false, state, dataORerr...)
 }
 
 // ResponJSONP sends a jsonp response to client,
 // it may not send data if the state is not status ok
 func (c *WingController) ResponJSONP(state int, data ...interface{}) {
-	if state != invar.StatusOK {
-		c.ErrorState(state)
-		return
-	}
+	c.responCheckState("jsonp", true, state, data...)
+}
 
-	ctl, act := c.GetControllerAndAction()
-	logger.I("Respone state:OK-JSONP >", ctl+"."+act)
-	c.Ctx.Output.Status = state
-	if data != nil && len(data) > 0 {
-		c.Data["jsonp"] = data[0]
-	}
-	c.ServeJSONP()
+// ResponJSONPUncheck sends a jsonp response to client witchout uncheck state code.
+func (c *WingController) ResponJSONPUncheck(state int, dataORerr ...interface{}) {
+	c.responCheckState("jsonp", false, state, dataORerr...)
 }
 
 // ResponXML sends xml response to client,
 // it may not send data if the state is not status ok
 func (c *WingController) ResponXML(state int, data ...interface{}) {
-	if state != invar.StatusOK {
-		c.ErrorState(state)
-		return
-	}
+	c.responCheckState("xml", true, state, data...)
+}
 
-	ctl, act := c.GetControllerAndAction()
-	logger.I("Respone state:OK-XML >", ctl+"."+act)
-	c.Ctx.Output.Status = state
-	if data != nil && len(data) > 0 {
-		c.Data["xml"] = data[0]
-	}
-	c.ServeXML()
+// ResponXMLUncheck sends xml response to client witchout uncheck state code.
+func (c *WingController) ResponXMLUncheck(state int, dataORerr ...interface{}) {
+	c.responCheckState("xml", false, state, dataORerr...)
 }
 
 // ResponYAML sends yaml response to client,
 // it may not send data if the state is not status ok
 func (c *WingController) ResponYAML(state int, data ...interface{}) {
-	if state != invar.StatusOK {
-		c.ErrorState(state)
-		return
-	}
+	c.responCheckState("yaml", true, state, data...)
+}
 
-	ctl, act := c.GetControllerAndAction()
-	logger.I("Respone state:OK-YAML >", ctl+"."+act)
-	c.Ctx.Output.Status = state
-	if data != nil && len(data) > 0 {
-		c.Data["yaml"] = data[0]
-	}
-	c.ServeYAML()
+// ResponYAML sends yaml response to client witchout uncheck state code.
+func (c *WingController) ResponYAMLUncheck(state int, dataORerr ...interface{}) {
+	c.responCheckState("yaml", false, state, dataORerr...)
 }
 
 // ResponData sends YAML, XML OR JSON, depending on the value of the Accept header,
