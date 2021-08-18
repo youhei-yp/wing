@@ -11,7 +11,9 @@
 package mvc
 
 import (
+	"encoding/json"
 	"github.com/astaxie/beego"
+	"github.com/go-playground/validator/v10"
 	"github.com/youhei-yp/wing/invar"
 	"github.com/youhei-yp/wing/logger"
 )
@@ -19,6 +21,39 @@ import (
 // WingController the base bee controller to support common utils
 type WingController struct {
 	beego.Controller
+}
+
+// GenInStruct generate the input param object for validate.
+type GenInStruct func() interface{}
+
+// NextFunc do action after input params validated.
+type NextFunc func() (int, interface{})
+
+var (
+	// Validator use for verify the input params on struct level
+	Validator *validator.Validate
+)
+
+// ensureValidatorIns generat the validator instance if need
+func ensureValidatorGenerated() {
+	if Validator == nil {
+		Validator = validator.New()
+	}
+}
+
+// RegisterValidators register struct field validators from given map
+func RegisterValidators(valmap map[string]validator.Func) {
+	for tag, valfunc := range valmap {
+		RegisterFieldValidator(tag, valfunc)
+	}
+}
+
+// RegisterValidators register validators on struct field level
+func RegisterFieldValidator(tag string, valfunc validator.Func) {
+	ensureValidatorGenerated()
+	if err := Validator.RegisterValidation(tag, valfunc); err != nil {
+		logger.E("Register struct field validator:"+tag+", err:", err)
+	}
 }
 
 // printLogWithError printf error log
@@ -200,4 +235,60 @@ func (c *WingController) BindValue(key string, dest interface{}) error {
 		return invar.ErrInvalidData
 	}
 	return nil
+}
+
+// DoAfterValidated do bussiness action after success validate the data returned by
+// GenInStruct function, and you must register the field level validator for returned
+// data's struct, then use it in struct describetion.
+//	[CODE:]
+//	types.go
+//	~~~~~~~~~~~~~~~
+//	type struct Accout {
+//		Acc string `json:"acc" validate:"required,IsVaildUuid"`
+//		PWD string `json:"pwd" validate:"required_without"`
+//		Num int    `json:"num"`
+//	}
+//
+//	// define custom validator on struct field level
+//	func isVaildUuid(fl validator.FieldLevel) bool {
+//		m, _ := regexp.Compile("^[0-9a-zA-Z]*$")
+//		str := fl.Field().String()
+//		return m.MatchString(str)
+//	}
+//
+//	func init() {
+//		mvc.RegisterFieldValidator("IsVaildUuid", isVaildUuid)
+//	}
+//
+//	controller.go
+//	~~~~~~~~~~~~~~~
+//	func (c *AccController) AccLogin() {
+//		ps := &types.Accout{}
+//		c.DoAfterValidated(ps, func() (int, interface{}) {
+//			// do same business function
+//			// directe use c and ps param in this methed.
+//			// ...
+//			return http.StatusOK, "Done business"
+//		})
+//	}
+//	[CODE]
+func (c *WingController) DoAfterValidated(ps interface{}, nextFunc NextFunc) {
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, ps); err != nil {
+		c.ErrorUnmarshal(err.Error())
+		return
+	}
+
+	ensureValidatorGenerated()
+	if err := Validator.Struct(ps); err != nil {
+		c.ErrorParams(err.Error())
+		return
+	}
+
+	// execute business function after validated
+	status, resp := nextFunc()
+	if resp != nil {
+		c.ResponJSON(status, resp)
+	} else {
+		c.ResponJSON(status)
+	}
 }
