@@ -12,6 +12,7 @@ package mvc
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"github.com/astaxie/beego"
 	"github.com/go-playground/validator/v10"
 	"github.com/youhei-yp/wing/invar"
@@ -237,8 +238,8 @@ func (c *WingController) BindValue(key string, dest interface{}) error {
 	return nil
 }
 
-// DoAfterValidated do bussiness action after success validate the data returned by
-// GenInStruct function, and you must register the field level validator for returned
+// DoAfterValidated do bussiness action after success validate the json data returned
+// by GenInStruct function, and you must register the field level validator for returned
 // data's struct, then use it in struct describetion.
 //	[CODE:]
 //	types.go
@@ -290,5 +291,28 @@ func (c *WingController) DoAfterValidated(ps interface{}, nextFunc NextFunc) {
 		c.ResponJSON(status, resp)
 	} else {
 		c.ResponJSON(status)
+	}
+}
+
+// DoAfterValidatedXml do bussiness action after success validate the given xml data
+// returned by GenInStruct function, see DoAfterValidated() to get more informations.
+func (c *WingController) DoAfterValidatedXml(ps interface{}, nextFunc NextFunc) {
+	if err := xml.Unmarshal(c.Ctx.Input.RequestBody, ps); err != nil {
+		c.ErrorUnmarshal(err.Error())
+		return
+	}
+
+	ensureValidatorGenerated()
+	if err := Validator.Struct(ps); err != nil {
+		c.ErrorParams(err.Error())
+		return
+	}
+
+	// execute business function after validated
+	status, resp := nextFunc()
+	if resp != nil {
+		c.ResponXML(status, resp)
+	} else {
+		c.ResponXML(status)
 	}
 }
