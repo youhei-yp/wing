@@ -102,7 +102,7 @@ func Tommorrow() int64 {
 
 // NextWeek return next week unix time start from current
 func NextWeek() int64 {
-	return time.Now().AddDate(0, 0, 1).Unix()
+	return time.Now().AddDate(0, 0, 7).Unix()
 }
 
 // NextMonth return next month unix time start from current
