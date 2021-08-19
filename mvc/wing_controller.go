@@ -192,7 +192,8 @@ func (c *WingController) ErrorUnmarshal(err ...string) {
 
 // ErrorParams response 400 invalid params error state to client
 func (c *WingController) ErrorParams(ps interface{}) {
-	c.ErrorState(invar.StatusErrParseParams, ps.(string))
+	logger.E("Invalid input params:", ps)
+	c.ErrorState(invar.StatusErrParseParams)
 }
 
 // ErrorUnauthed response 401 unauthenticated error state to client
