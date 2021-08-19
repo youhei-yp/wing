@@ -63,8 +63,8 @@ type SmsContent struct {
 type respResult struct {
 	Message   string `json:"Message"`
 	RequestID string `json:"RequestId"`
-	// BizID     string "BizId"
-	Code string "Code"
+	// BizID     string `describtion:"BizId"`
+	Code string `describtion:"Code"`
 }
 
 // encodeURL replace encode string to use in web transation
