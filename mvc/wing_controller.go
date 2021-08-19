@@ -258,9 +258,51 @@ func (c *WingController) BindValue(key string, dest interface{}) error {
 	return nil
 }
 
-// DoAfterValidated do bussiness action after success validate the json data returned
-// by GenInStruct function, and you must register the field level validator for returned
-// data's struct, then use it in struct describetion.
+// doAfterValidatedInner do bussiness action after success unmarshal params or
+// validate the unmarshaled json data.
+func (c *WingController) doAfterParsedOrValidated(datatype string, ps interface{},
+	nextFunc NextFunc, isvalidate, isprotect bool) {
+
+	// unmarshal the input params
+	switch datatype {
+	case "json":
+		if err := json.Unmarshal(c.Ctx.Input.RequestBody, ps); err != nil {
+			c.ErrorUnmarshal(err.Error())
+			return
+		}
+	case "xml":
+		if err := xml.Unmarshal(c.Ctx.Input.RequestBody, ps); err != nil {
+			c.ErrorUnmarshal(err.Error())
+			return
+		}
+	default: // current not support the jsonp and yaml parse
+		c.ErrorException("Invalid data type:" + datatype)
+		return
+	}
+
+	// validate input params if need
+	if isvalidate {
+		logger.D("Validating the input params:", ps)
+		ensureValidatorGenerated()
+		if err := Validator.Struct(ps); err != nil {
+			c.ErrorValidate(ps, err.Error())
+			return
+		}
+	}
+
+	// execute business function after unmarshal and validated
+	status, resp := nextFunc()
+	logger.D("Using protect:", isprotect, "mode limit response error to client")
+	if resp != nil {
+		c.responCheckState(datatype, isprotect, status, resp)
+	} else {
+		c.responCheckState(datatype, isprotect, status)
+	}
+}
+
+// DoAfterValidated do bussiness action after success validate the given json data,
+// notice that you should register the field level validator for the input data's struct,
+// then use it in struct describetion label as validate target.
 //	[CODE:]
 //	types.go
 //	~~~~~~~~~~~~~~~
@@ -290,57 +332,31 @@ func (c *WingController) BindValue(key string, dest interface{}) error {
 //			// directe use c and ps param in this methed.
 //			// ...
 //			return http.StatusOK, "Done business"
-//		} /** , false /* not filter error message even code is 40x */ */)
+//		} /** , false /* not limit error message even code is 40x */ */)
 //	}
 //	[CODE]
 func (c *WingController) DoAfterValidated(ps interface{}, nextFunc NextFunc, option ...interface{}) {
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, ps); err != nil {
-		c.ErrorUnmarshal(err.Error())
-		return
-	}
-
-	ensureValidatorGenerated()
-	if err := Validator.Struct(ps); err != nil {
-		c.ErrorValidate(ps, err.Error())
-		return
-	}
-
-	// parse uncheck option, default is false
-	uncheck := (option != nil && len(option) > 0 && !option[0].(bool))
-	logger.D("Using uncheck:", uncheck, "mode to filter error response message")
-
-	// execute business function after validated
-	status, resp := nextFunc()
-	if resp != nil {
-		c.responCheckState("json", !uncheck, status, resp)
-	} else {
-		c.responCheckState("json", !uncheck, status)
-	}
+	isprotect := !(option != nil && len(option) > 0 && !option[0].(bool))
+	c.doAfterParsedOrValidated("json", ps, nextFunc, true, isprotect)
 }
 
-// DoAfterValidatedXml do bussiness action after success validate the given xml data
-// returned by GenInStruct function, see DoAfterValidated() to get more informations.
+// DoAfterUnmarshal do bussiness action after success unmarshaled the given json data.
+//	@see DoAfterValidated
+func (c *WingController) DoAfterUnmarshal(ps interface{}, nextFunc NextFunc, option ...interface{}) {
+	isprotect := !(option != nil && len(option) > 0 && !option[0].(bool))
+	c.doAfterParsedOrValidated("json", ps, nextFunc, false, isprotect)
+}
+
+// DoAfterValidatedXml do bussiness action after success validate the given xml data.
+//	@see DoAfterValidated
 func (c *WingController) DoAfterValidatedXml(ps interface{}, nextFunc NextFunc, option ...interface{}) {
-	if err := xml.Unmarshal(c.Ctx.Input.RequestBody, ps); err != nil {
-		c.ErrorUnmarshal(err.Error())
-		return
-	}
+	isprotect := !(option != nil && len(option) > 0 && !option[0].(bool))
+	c.doAfterParsedOrValidated("xml", ps, nextFunc, true, isprotect)
+}
 
-	ensureValidatorGenerated()
-	if err := Validator.Struct(ps); err != nil {
-		c.ErrorValidate(ps, err.Error())
-		return
-	}
-
-	// parse uncheck option, default is false
-	uncheck := (option != nil && len(option) > 0 && !option[0].(bool))
-	logger.D("Using uncheck:", uncheck, "mode to filter error response message")
-
-	// execute business function after validated
-	status, resp := nextFunc()
-	if resp != nil {
-		c.responCheckState("xml", !uncheck, status, resp)
-	} else {
-		c.responCheckState("xml", !uncheck, status)
-	}
+// DoAfterUnmarshalXml do bussiness action after success unmarshaled the given xml data.
+//	@see DoAfterValidated, DoAfterValidatedXml
+func (c *WingController) DoAfterUnmarshalXml(ps interface{}, nextFunc NextFunc, option ...interface{}) {
+	isprotect := !(option != nil && len(option) > 0 && !option[0].(bool))
+	c.doAfterParsedOrValidated("xml", ps, nextFunc, false, isprotect)
 }
