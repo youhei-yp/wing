@@ -39,6 +39,7 @@ var (
 // ensureValidatorGenerated generat the validator instance if need
 func ensureValidatorGenerated() {
 	if Validator == nil {
+		logger.D("Generat the singleton validator instance")
 		Validator = validator.New()
 	}
 }
@@ -55,6 +56,8 @@ func RegisterFieldValidator(tag string, valfunc validator.Func) {
 	ensureValidatorGenerated()
 	if err := Validator.RegisterValidation(tag, valfunc); err != nil {
 		logger.E("Register struct field validator:"+tag+", err:", err)
+	} else {
+		logger.D("struct field validator:", tag)
 	}
 }
 
@@ -92,6 +95,7 @@ func (c *WingController) responCheckState(datatype string, needCheck bool, state
 		c.ServeYAML()
 	default:
 		// just return blank string to close http connection
+		logger.W("Invalid response data tyep:" + datatype)
 		c.Ctx.ResponseWriter.Write([]byte(""))
 	}
 }
@@ -191,9 +195,18 @@ func (c *WingController) ErrorUnmarshal(err ...string) {
 }
 
 // ErrorParams response 400 invalid params error state to client
+//	@deprecated this method will delete at the next version, use ErrorValidate
+//				instead or DoAfterValidated to auto print error log.
 func (c *WingController) ErrorParams(ps interface{}) {
 	logger.E("Invalid input params:", ps)
 	c.ErrorState(invar.StatusErrParseParams)
+}
+
+// ErrorValidate response 400 invalid params error state to client, then print
+// the params data and validate error
+func (c *WingController) ErrorValidate(ps interface{}, err ...string) {
+	logger.E("Invalid input params:", ps)
+	c.ErrorState(invar.StatusErrParseParams, err...)
 }
 
 // ErrorUnauthed response 401 unauthenticated error state to client
@@ -288,12 +301,13 @@ func (c *WingController) DoAfterValidated(ps interface{}, nextFunc NextFunc, opt
 
 	ensureValidatorGenerated()
 	if err := Validator.Struct(ps); err != nil {
-		c.ErrorParams(err.Error())
+		c.ErrorValidate(ps, err.Error())
 		return
 	}
 
 	// parse uncheck option, default is false
 	uncheck := (option != nil && len(option) > 0 && !option[0].(bool))
+	logger.D("Using uncheck:", uncheck, "mode to filter error response message")
 
 	// execute business function after validated
 	status, resp := nextFunc()
@@ -314,12 +328,13 @@ func (c *WingController) DoAfterValidatedXml(ps interface{}, nextFunc NextFunc, 
 
 	ensureValidatorGenerated()
 	if err := Validator.Struct(ps); err != nil {
-		c.ErrorParams(err.Error())
+		c.ErrorValidate(ps, err.Error())
 		return
 	}
 
 	// parse uncheck option, default is false
 	uncheck := (option != nil && len(option) > 0 && !option[0].(bool))
+	logger.D("Using uncheck:", uncheck, "mode to filter error response message")
 
 	// execute business function after validated
 	status, resp := nextFunc()
