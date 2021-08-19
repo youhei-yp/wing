@@ -215,3 +215,20 @@ func DurDays(start, end time.Time, format ...string) string {
 	}
 	return fmt.Sprintf("%dd %dh %dm %ds", d, h, m, s)
 }
+
+// FormatUnix format unix time to given time layout
+func FormatUnix(layout string, unixsec int64, unixnsec ...int64) string {
+	switch layout {
+	case DateLayout, HourLayout:
+		return time.Unix(unixsec, 0).Format(layout)
+	case MSLayout:
+		var nsec int64 = 0
+		if unixnsec != nil && len(unixnsec) > 0 && unixnsec[0] > 0 {
+			nsec = unixnsec[0]
+		}
+		return time.Unix(unixsec, nsec).Format(MSLayout)
+	default:
+		// TimeLayout as the default time layout
+		return time.Unix(unixsec, 0).Format(TimeLayout)
+	}
+}
