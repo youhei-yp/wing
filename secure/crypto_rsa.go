@@ -18,6 +18,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"github.com/youhei-yp/wing/invar"
+	"io/ioutil"
 	"os"
 )
 
@@ -117,19 +118,27 @@ func GenRSAKeys(bits int) (string, string, error) {
 
 // LoadRSAKey load RSA private or public key content from the given pem file,
 // and the bufbits must larger than pem file size as call GenRSAKeys to set bits.
-func LoadRSAKey(filepath string, buffbits int) ([]byte, error) {
-	pemfile, err := os.Open(filepath)
-	if err != nil {
-		return nil, err
-	}
-	defer pemfile.Close()
+func LoadRSAKey(filepath string, buffbits ...int) ([]byte, error) {
+	if buffbits != nil && len(buffbits) > 0 && buffbits[0] > 0 {
+		pemfile, err := os.Open(filepath)
+		if err != nil {
+			return nil, err
+		}
+		defer pemfile.Close()
 
-	keybuf := make([]byte, buffbits)
-	num, err := pemfile.Read(keybuf)
-	if err != nil {
-		return nil, err
+		keybuf := make([]byte, buffbits[0])
+		num, err := pemfile.Read(keybuf)
+		if err != nil {
+			return nil, err
+		}
+		return keybuf[:num], nil
+	} else {
+		pemfile, err := ioutil.ReadFile(filepath)
+		if err != nil {
+			return nil, err
+		}
+		return pemfile, nil
 	}
-	return keybuf[:num], nil
 }
 
 // RSAEncrypt using RSA to encrypt original data
