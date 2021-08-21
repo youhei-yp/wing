@@ -50,11 +50,23 @@ const (
 	// TimeLayout standery time layout format at second minimum
 	TimeLayout = "2006-01-02 15:04:05"
 
-	// HourLayout standery time layout format at second minimum
+	// HourLayout standery time layout format as hour
 	HourLayout = "15:04:05"
 
 	// MSLayout standery time layout format at million second minimum
 	MSLayout = "2006-01-02 15:04:05.000"
+
+	// DateNoneHyphen standery time layout format at second minimum without hyphen char
+	DateNoneHyphen = "20060102"
+
+	// TimeNoneHyphen standery time layout format at second minimum without hyphen char
+	TimeNoneHyphen = "20060102150405"
+
+	// HourNoneHyphen standery time layout format as hour without hyphen char
+	HourNoneHyphen = "150405"
+
+	// MSNoneHyphen standery time layout format at million second minimum without hyphen char
+	MSNoneHyphen = "20060102150405000"
 )
 
 // IsToday check the given day string if today
@@ -219,16 +231,17 @@ func DurDays(start, end time.Time, format ...string) string {
 // FormatUnix format unix time to given time layout
 func FormatUnix(layout string, unixsec int64, unixnsec ...int64) string {
 	switch layout {
-	case DateLayout, HourLayout:
+	case DateLayout, TimeLayout, HourLayout, DateNoneHyphen, TimeNoneHyphen, HourNoneHyphen:
 		return time.Unix(unixsec, 0).Format(layout)
-	case MSLayout:
+
+	case MSLayout, MSNoneHyphen:
 		var nsec int64 = 0
 		if unixnsec != nil && len(unixnsec) > 0 && unixnsec[0] > 0 {
 			nsec = unixnsec[0]
 		}
-		return time.Unix(unixsec, nsec).Format(MSLayout)
-	default:
-		// TimeLayout as the default time layout
-		return time.Unix(unixsec, 0).Format(TimeLayout)
+		return time.Unix(unixsec, nsec).Format(layout)
 	}
+
+	// TimeLayout as the default time layout
+	return time.Unix(unixsec, 0).Format(TimeLayout)
 }

@@ -119,6 +119,19 @@ func GenToken(original string) string {
 	return EncodeB64MD5(strings.ToLower(original))
 }
 
+// GenNonce generate a random num than to string
+func GenNonce() string {
+	res := make([]byte, 32)
+	seeds := [][]int{{10, 48}, {26, 97}, {26, 65}}
+
+	rand.Seed(time.Now().UnixNano())
+	for i := 0; i < 32; i++ {
+		v := seeds[rand.Intn(3)]
+		res[i] = uint8(v[1] + rand.Intn(v[0]))
+	}
+	return string(res)
+}
+
 // GenOAuthCode generate a random OAuth code
 func GenOAuthCode(length int, randomType string) (string, error) {
 	// fill random seeds chars
@@ -181,6 +194,15 @@ func HashSHA256(original []byte) []byte {
 	// hashed := h.Sum(nil)
 	hashed := sha256.Sum256(original)
 	return hashed[:]
+}
+
+// HashRSA2 hash RSA2 byte array and encode to hex by sha256
+func HashRSA2(original []byte) string {
+	// h := sha256.New()
+	// h.Write([]byte(original))
+	// hashed := h.Sum(nil)
+	hashed := sha256.Sum256(original)
+	return hex.EncodeToString(hashed[:])
 }
 
 // HashSHA256String hash string by sha256
