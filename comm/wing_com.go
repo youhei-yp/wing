@@ -12,6 +12,8 @@
 package comm
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/astaxie/beego"
@@ -68,20 +70,35 @@ func ToNDigits(input interface{}, n int) string {
 	return fmt.Sprintf("%0"+strconv.Itoa(n)+"d", input)
 }
 
-// IgnoreSysSignalPIPE ignore system PIPE signal
-func IgnoreSysSignalPIPE() {
-	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGPIPE)
-	go func() {
-		for {
-			select {
-			case sig := <-sc:
-				if sig == syscall.SIGPIPE {
-					logger.E("!! IGNORE BROKEN PIPE SIGNAL !!")
-				}
-			}
-		}
-	}()
+// ToMap transform given struct data to map data, the transform struct
+// feilds must using json tag to mark the map key.
+//	[CODE:]
+//	type struct Sample {
+//		Name string `json:"name"`
+//	}
+//	d := Sample{ Name : "name_value" }
+//	md, _ := comm.ToMap(d)
+//	// md data format is {
+//	//     "name" : "name_value"
+//	// }
+//	[CODE]
+func ToMap(input interface{}) (map[string]interface{}, error) {
+	out := make(map[string]interface{})
+	structbuf, err := json.Marshal(input)
+	if err != nil {
+		logger.E("Marshal input struct err:", err)
+		return nil, err
+	}
+
+	// json buffer decode to map
+	d := json.NewDecoder(bytes.NewReader(structbuf))
+	d.UseNumber()
+	if err = d.Decode(&out); err != nil {
+		logger.E("Decode json data to map err:", err)
+		return nil, err
+	}
+
+	return out, nil
 }
 
 // GetSortKey get first letter of Chinese Pinyin
@@ -148,6 +165,22 @@ func RemoveDuplicate(oldArr []string) []string {
 	return newArr
 }
 
+// IgnoreSysSignalPIPE ignore system PIPE signal
+func IgnoreSysSignalPIPE() {
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGPIPE)
+	go func() {
+		for {
+			select {
+			case sig := <-sc:
+				if sig == syscall.SIGPIPE {
+					logger.E("!! IGNORE BROKEN PIPE SIGNAL !!")
+				}
+			}
+		}
+	}()
+}
+
 // AccessAllowOriginBy allow cross domain access for the given origins
 func AccessAllowOriginBy(category int, origins string) {
 	beego.InsertFilter("*", category, cors.Allow(&cors.Options{
@@ -159,7 +192,12 @@ func AccessAllowOriginBy(category int, origins string) {
 	}))
 }
 
-// AccessAllowOriginByLocal allow cross domain access for localhost
+// AccessAllowOriginByLocal allow cross domain access for localhost,
+// the port number must config in /conf/app.conf file like :
+//	~~~~~~
+//	; Server port of HTTP
+//	httpport=3200
+//	~~~~~~
 func AccessAllowOriginByLocal(category int) {
 	if beego.BConfig.Listen.HTTPPort > 0 {
 		localhosturl := fmt.Sprintf("http://127.0.0.1:%v/", beego.BConfig.Listen.HTTPPort)
