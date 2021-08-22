@@ -246,8 +246,12 @@ func FormatUnix(layout string, unixsec int64, unixnsec ...int64) string {
 	return time.Unix(unixsec, 0).Format(TimeLayout)
 }
 
-// FormatUnixNow format now to given time layout
-func FormatUnixNow(layout string) string {
+// FormatNow format now to given time layout, it may format as
+// TimeLayout when input param not set.
+func FormatNow(layout ...string) string {
 	nowns := time.Now().UnixNano()
-	return FormatUnix(layout, nowns/1e9, (nowns%1e9)/1e6)
+	if layout != nil && len(layout) > 0 && layout[0] != "" {
+		return FormatUnix(layout[0], nowns/1e9, (nowns%1e9)/1e6)
+	}
+	return FormatUnix(TimeLayout, nowns/1e9, (nowns%1e9)/1e6)
 }
