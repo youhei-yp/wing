@@ -245,3 +245,9 @@ func FormatUnix(layout string, unixsec int64, unixnsec ...int64) string {
 	// TimeLayout as the default time layout
 	return time.Unix(unixsec, 0).Format(TimeLayout)
 }
+
+// FormatUnixNow format now to given time layout
+func FormatUnixNow(layout string) string {
+	nowns := time.Now().UnixNano()
+	return FormatUnix(layout, nowns/1e9, (nowns%1e9)/1e6)
+}
