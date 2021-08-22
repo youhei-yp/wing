@@ -14,6 +14,7 @@ package comm
 import (
 	"bytes"
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"github.com/astaxie/beego"
@@ -25,6 +26,7 @@ import (
 	"os/signal"
 	"regexp"
 	"strconv"
+	"strings"
 	"syscall"
 	"unicode"
 )
@@ -84,14 +86,14 @@ func ToNDigits(input interface{}, n int) string {
 //	[CODE]
 func ToMap(input interface{}) (map[string]interface{}, error) {
 	out := make(map[string]interface{})
-	structbuf, err := json.Marshal(input)
+	buf, err := json.Marshal(input)
 	if err != nil {
 		logger.E("Marshal input struct err:", err)
 		return nil, err
 	}
 
 	// json buffer decode to map
-	d := json.NewDecoder(bytes.NewReader(structbuf))
+	d := json.NewDecoder(bytes.NewReader(buf))
 	d.UseNumber()
 	if err = d.Decode(&out); err != nil {
 		logger.E("Decode json data to map err:", err)
@@ -99,6 +101,33 @@ func ToMap(input interface{}) (map[string]interface{}, error) {
 	}
 
 	return out, nil
+}
+
+// ToXMLString transform given struct data to xml string
+func ToXMLString(input interface{}) (string, error) {
+	buf, err := xml.Marshal(input)
+	if err != nil {
+		logger.E("Marshal input to XML err:", err)
+		return "", err
+	}
+	return string(buf), nil
+}
+
+// ToXMLReplace transform given struct data to xml string, ant then
+// replace indicated fileds or values, to form param must not empty,
+// but the to param allow set empty when use to remove all form keyworlds.
+func ToXMLReplace(input interface{}, from, to string) (string, error) {
+	xmlout, err := ToXMLString(input)
+	if err != nil {
+		return "", err
+	}
+
+	from = strings.TrimSpace(from)
+	if from != "" && len(from) > 0 {
+		logger.D("Replace xml string from:", from, "to:", to)
+		xmlout = strings.Replace(xmlout, from, to, -1)
+	}
+	return xmlout, nil
 }
 
 // GetSortKey get first letter of Chinese Pinyin

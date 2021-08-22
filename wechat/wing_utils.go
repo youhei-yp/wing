@@ -23,7 +23,7 @@ func AuthPacket(mchid, serialno, signature, timestamp, nonce string) string {
 	return packet
 }
 
-// NotifyPacket generate wechat signature string packet
+// NotifyPacket generate wechat notification string packet
 func NotifyPacket(timestamp, nonce, body string) string {
 	packet := ""
 	packet += timestamp + "\n"
