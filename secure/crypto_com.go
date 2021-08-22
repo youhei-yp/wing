@@ -196,13 +196,9 @@ func HashSHA256(original []byte) []byte {
 	return hashed[:]
 }
 
-// HashRSA2 hash RSA2 byte array and encode to hex by sha256
-func HashRSA2(original []byte) string {
-	// h := sha256.New()
-	// h.Write([]byte(original))
-	// hashed := h.Sum(nil)
-	hashed := sha256.Sum256(original)
-	return hex.EncodeToString(hashed[:])
+// HashSHA256Hex hash byte array by sha256 then encode to hex
+func HashSHA256Hex(original []byte) string {
+	return hex.EncodeToString(HashSHA256(original))
 }
 
 // HashSHA256String hash string by sha256
